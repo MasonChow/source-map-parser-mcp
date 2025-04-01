@@ -49,7 +49,6 @@ The content is organized as follows:
 
 <directory_structure>
 src/
-  debug.ts
   main.ts
   parser.ts
   server.ts
@@ -59,15 +58,19 @@ README.md
 <files>
 This section contains the contents of the repository's files.
 
-<file path="src/debug.ts">
-import parser from "./parser";
-async function main()
-</file>
-
 <file path="src/main.ts">
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import server from './server';
 const main = async () =>
+</file>
+
+<file path="src/server.ts">
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import packageJson from "../package.json";
+import parser from "./parser";
+import fs from 'node:fs/promises';
+import path from 'node:path';
 </file>
 
 <file path="src/parser.ts">
@@ -142,12 +145,6 @@ type BatchParseResult = Array<{
 /** Parsed token object */
 ⋮----
 const arrayBufferToString = (buffer: ArrayBuffer): string =>
-type WasmGenerateTokenBySingleStackFn = (
-  line: number,
-  column: number,
-  sourceMap: string,
-  contextOffsetLine?: number,
-) => Promise<string>;
 class Parser
 ⋮----
 /** Indicates whether the parser has been initialized */
@@ -193,21 +190,16 @@ public async praseStack(stack: Stack, contextOffsetLine?: number): Promise<Token
 public async getSourceToken(line: number, column: number, sourceMap: string, contextOffsetLine?: number): Promise<Token>
 </file>
 
-<file path="src/server.ts">
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import packageJson from "../package.json";
-import parser from "./parser";
-import fs from 'node:fs/promises';
-import path from 'node:path';
-</file>
-
 <file path="README.md">
 # Source Map Parser
 
 🌐 **Languages**: [English](README.md) | [简体中文](README.zh-CN.md)
 
 This project implements a WebAssembly-based Source Map parser that maps JavaScript error stack traces back to the original source code and extracts relevant context information. Developers can easily locate and fix issues by mapping JavaScript error stack traces to the original source code. We hope this documentation helps developers better understand and use this tool.
+
+## MCP Integration
+
+`npx -y source-map-parser-mcp@latest`
 
 ## Features
 
@@ -264,6 +256,26 @@ Parse stack trace information and Source Map URLs.
 - `success`: Indicates whether the parsing was successful.
 - `token`: The parsed token object returned upon successful parsing, including source code line number, column number, context code, etc.
 - `error`: Error information returned when parsing fails.
+
+## Advanced Usage
+
+For security or performance reasons, some teams may prefer not to expose Source Maps directly to the browser for parsing. Instead, they preprocess the upload paths of Source Maps. For example, the path `/assets/index.js` can be transformed into `source_backup/index.js.map`.
+
+In such cases, you can guide the model to complete the path transformation using prompt-based rules.
+
+### Prompt Example
+
+```markdown
+**Source Map Tool Usage Guide**
+
+Below are the rules for resolving remote Source Map URLs, where `origin_url` represents the error path in the stack trace.
+
+1. Replace the Source Map resource URL based on the source path in the stack trace:
+   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+
+2. If no matching rule is found, use the following fallback rule:
+   `${origin_url}.map` and retry.
+```
 
 ## Local Development Guide
 
