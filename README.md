@@ -4,6 +4,10 @@
 
 This project implements a WebAssembly-based Source Map parser that maps JavaScript error stack traces back to the original source code and extracts relevant context information. Developers can easily locate and fix issues by mapping JavaScript error stack traces to the original source code. We hope this documentation helps developers better understand and use this tool.
 
+## MCP Integration
+
+`npx -y source-map-parser-mcp@latest`
+
 ## Features
 
 1. **Stack Trace Parsing**: Parse the corresponding source code location based on the provided line number, column number, and Source Map file.
