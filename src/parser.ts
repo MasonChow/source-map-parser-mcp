@@ -91,9 +91,6 @@ class Parser {
       const buffer = await res.arrayBuffer();
       return arrayBufferToString(buffer);
     } catch (error) {
-      console.log('::::::', error);
-
-
       throw new Error("fetch source map error: " + (error instanceof Error ? error.message : error), {
         cause: error,
       });
