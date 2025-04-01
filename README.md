@@ -64,6 +64,26 @@ Parse stack trace information and Source Map URLs.
 - `token`: The parsed token object returned upon successful parsing, including source code line number, column number, context code, etc.
 - `error`: Error information returned when parsing fails.
 
+## Advanced Usage
+
+For security or performance reasons, some teams may prefer not to expose Source Maps directly to the browser for parsing. Instead, they preprocess the upload paths of Source Maps. For example, the path `/assets/index.js` can be transformed into `source_backup/index.js.map`.
+
+In such cases, you can guide the model to complete the path transformation using prompt-based rules.
+
+### Prompt Example
+
+```markdown
+**Source Map Tool Usage Guide**
+
+Below are the rules for resolving remote Source Map URLs, where `origin_url` represents the error path in the stack trace.
+
+1. Replace the Source Map resource URL based on the source path in the stack trace:
+   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+
+2. If no matching rule is found, use the following fallback rule:
+   `${origin_url}.map` and retry.
+```
+
 ## Local Development Guide
 
 ### 1. Install Dependencies

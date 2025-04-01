@@ -77,6 +77,26 @@
 - `token`：解析成功时返回的 Token 对象，包含源代码行号、列号、上下文代码等信息。
 - `error`：解析失败时返回的错误信息。
 
+## 进阶用法
+
+部分团队出于安全性或性能考虑，不希望直接将 Source Map 暴露给浏览器进行解析，而是对 Source Map 的上传路径进行一定的处理。例如，将路径 `/assets/index.js` 转换为 `source_backup/index.js.map`。
+
+在这种情况下，可以通过提示词规则引导模型完成路径转换。
+
+### 提示词示例
+
+```markdown
+**Source Map 工具使用指南**
+
+以下是 Source Map 远程地址的解析规则，其中 `origin_url` 表示堆栈中的错误地址。
+
+1. 根据堆栈的源码路径，替换 Source Map 的资源地址：
+   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+
+2. 如果所有规则均未匹配成功，则使用以下回退规则：
+   `${origin_url}.map` 并重新尝试。
+```
+
 ## 本地开发指南
 
 ### 1. 安装依赖
