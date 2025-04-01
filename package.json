@@ -1,0 +1,33 @@
+{
+  "name": "source-map-parser-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "bash build.sh",
+    "build:vite": "vite build",
+    "deploy": "npm run build && npm publish"
+  },
+  "bin": {
+    "main": "./dist/main.es.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [],
+  "author": "MasonChow <mason.zhou@shopline.com>",
+  "collaborators": [
+    "MasonChow <mason.zhou@shopline.com>"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@types/node": "^22.13.14",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.4",
+    "zod": "^3.24.2"
+  }
+}
