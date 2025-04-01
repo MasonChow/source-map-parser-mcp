@@ -4,6 +4,10 @@
 
 本项目实现了一个基于 WebAssembly 的 Source Map 解析器，能够将 JavaScript 错误堆栈信息映射回源代码，并提取相关的上下文信息，开发者可以方便地将 JavaScript 错误堆栈信息映射回源代码，快速定位和修复问题。希望本项目的文档能帮助开发者更好地理解和使用该工具
 
+## MCP 串接
+
+`npx -y source-map-parser-mcp@latest`
+
 ## 功能概述
 
 1. **堆栈解析**：根据提供的行号、列号和 Source Map 文件，解析出对应的源代码位置。
