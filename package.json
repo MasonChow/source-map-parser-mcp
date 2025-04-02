@@ -1,6 +1,6 @@
 {
   "name": "source-map-parser-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -26,7 +26,6 @@
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
     "@types/node": "^22.13.14",
-    "node-fetch": "^3.3.2",
     "typescript": "^5.8.2",
     "vite": "^6.2.4",
     "zod": "^3.24.2"

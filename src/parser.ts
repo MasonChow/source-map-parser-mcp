@@ -1,5 +1,4 @@
 import { stackParserJsSdk } from './external/index.js';
-import fetch from 'node-fetch';
 interface Stack {
   /** Line number in the stack trace */
   line: number;
@@ -107,21 +106,22 @@ class Parser {
   public async batchParseStack(stackArr: Stack[], contextOffsetLine?: number): Promise<BatchParseResult> {
     const result: BatchParseResult = [];
 
-    await Promise.all(stackArr.map(async (stack) => {
+    await Promise.all(stackArr.map(async (stack, idx) => {
       try {
         const sourceMapContent = await this.fetchSourceMapContent(stack.sourceMapUrl);
         const token = await this.getSourceToken(stack.line, stack.column, sourceMapContent, contextOffsetLine);
-        result.push({
+
+        result[idx] = {
           success: true,
           token,
-        });
+        };
       } catch (error) {
-        result.push({
+        result[idx] = {
           success: false,
-          error: error instanceof Error ? error : new Error("unknown error", {
+          error: new Error("parse token error: " + (error instanceof Error ? error.message : error), {
             cause: error,
           }),
-        });
+        }
       }
     }));
 
