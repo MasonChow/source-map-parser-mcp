@@ -1,5 +1,5 @@
 import { stackParserJsSdk } from './external/index.js';
-
+import fetch from 'node-fetch';
 interface Stack {
   /** Line number in the stack trace */
   line: number;

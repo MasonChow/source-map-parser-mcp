@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY src ./
 COPY build.sh ./
+COPY vite.config.mjs ./
 
 RUN npm install
 RUN npm run build
