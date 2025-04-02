@@ -6,6 +6,8 @@ This project implements a WebAssembly-based Source Map parser that maps JavaScri
 
 ## MCP Integration
 
+> Note: The minimum required Node.js version is 18+.
+
 `npx -y source-map-parser-mcp@latest`
 
 ## Features
@@ -83,6 +85,20 @@ Below are the rules for resolving remote Source Map URLs, where `origin_url` rep
 2. If no matching rule is found, use the following fallback rule:
    `${origin_url}.map` and retry.
 ```
+
+## FAQ
+
+### 1. WebAssembly Module Loading Failure
+
+If the tool returns the following error message, follow these steps to troubleshoot:
+
+> parser init error: WebAssembly.instantiate(): invalid value type 'externref', enable with --experimental-wasm-reftypes @+86
+
+1. **Check Node.js Version**: Ensure that the Node.js version is 18 or higher. If it is lower than 18, upgrade Node.js.
+2. **Enable Experimental Flag**: If the Node.js version is 18+ but the issue persists, start the tool with the following command:
+   ```bash
+   npx --node-arg=--experimental-wasm-reftypes -y source-map-parser-mcp@latest
+   ```
 
 ## Local Development Guide
 

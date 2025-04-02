@@ -6,6 +6,8 @@
 
 ## MCP 串接
 
+> 注意 node 版本最低要 18+
+
 `npx -y source-map-parser-mcp@latest`
 
 ## 功能概述
@@ -96,6 +98,20 @@
 2. 如果所有规则均未匹配成功，则使用以下回退规则：
    `${origin_url}.map` 并重新尝试。
 ```
+
+## FAQ
+
+### 1. WebAssembly 模块加载失败
+
+如果工具返回以下错误信息，请按照以下步骤排查问题：
+
+> parser init error: WebAssembly.instantiate(): invalid value type 'externref', enable with --experimental-wasm-reftypes @+86
+
+1. **检查 Node.js 版本**：确保 Node.js 版本为 18 或更高。如果版本低于 18，请升级 Node.js。
+2. **启用实验性标志**：如果 Node.js 版本为 18+ 但仍然遇到问题，请使用以下命令启动工具：
+   ```bash
+   npx --node-arg=--experimental-wasm-reftypes -y source-map-parser-mcp@latest
+   ```
 
 ## 本地开发指南
 
