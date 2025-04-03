@@ -1,5 +1,7 @@
 # Source Map 解析器
 
+[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
+
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
 
 本项目实现了一个基于 WebAssembly 的 Source Map 解析器，能够将 JavaScript 错误堆栈信息映射回源代码，并提取相关的上下文信息，开发者可以方便地将 JavaScript 错误堆栈信息映射回源代码，快速定位和修复问题。希望本项目的文档能帮助开发者更好地理解和使用该工具
