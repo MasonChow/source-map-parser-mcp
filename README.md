@@ -1,5 +1,7 @@
 # Source Map Parser
 
+[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
+
 🌐 **Languages**: [English](README.md) | [简体中文](README.zh-CN.md)
 
 This project implements a WebAssembly-based Source Map parser that maps JavaScript error stack traces back to the original source code and extracts relevant context information. Developers can easily locate and fix issues by mapping JavaScript error stack traces to the original source code. We hope this documentation helps developers better understand and use this tool.
