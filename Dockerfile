@@ -4,10 +4,10 @@ FROM node:22.14.0
 WORKDIR /app
 
 # Install app dependencies
-COPY package*.json ./
-COPY src ./
-COPY build.sh ./
-COPY vite.config.mjs ./
+COPY package.json .
+COPY src/ ./src
+COPY build.sh .
+COPY vite.config.mjs .
 
 RUN npm install
 RUN npm run build

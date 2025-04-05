@@ -10,7 +10,7 @@ startCommand:
     (config) => ({
       "command": "node",
       "args": [
-        "dist/main.es.js"
+        "/app/dist/main.es.js"
       ],
       "env": {}
     })
