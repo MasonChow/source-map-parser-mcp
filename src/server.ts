@@ -9,6 +9,10 @@ import path from 'node:path';
 const server = new McpServer({
   name: packageJson.name,
   version: packageJson.version
+}, {
+  capabilities: {
+    tools: {}
+  }
 });
 
 server.tool('operating_guide', `
@@ -31,6 +35,7 @@ server.tool('operating_guide', `
     }
   } catch (error) {
     return {
+      isError: true,
       content: [
         {
           type: "text",
@@ -84,6 +89,7 @@ server.tool("parse_stack", `
 
   if (parserRes.length === 0) {
     return {
+      isError: true,
       content: [{ type: "text", text: "No data could be parsed from the provided stack traces." }],
     }
   }
