@@ -1,8 +1,10 @@
 # Source Map 解析器
 
-[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
-
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
+
+<a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
+</a>
 
 本项目实现了一个基于 WebAssembly 的 Source Map 解析器，能够将 JavaScript 错误堆栈信息映射回源代码，并提取相关的上下文信息，开发者可以方便地将 JavaScript 错误堆栈信息映射回源代码，快速定位和修复问题。希望本项目的文档能帮助开发者更好地理解和使用该工具
 
@@ -61,7 +63,6 @@ npx -y source-map-parser-mcp@latest
 - stacks ：堆栈信息，包含行号、列号和 Source Map 地址。
   - line ：行号，必填。
   - column ：列号，必填。
-- ctxOffset ：上下文行数，默认值为 5。
 
 ```json
 {
@@ -71,21 +72,7 @@ npx -y source-map-parser-mcp@latest
       "column": 5,
       "sourceMapUrl": "https://example.com/source.map"
     }
-  ],
-  "ctxOffset": 5
-}
-```
-
-```json
-{
-  "stacks": [
-    {
-      "line": 10,
-      "column": 5,
-      "sourceMapUrl": "https://example.com/source.map"
-    }
-  ],
-  "ctxOffset": 5
+  ]
 }
 ```
 
@@ -179,8 +166,7 @@ npx tsx src/main.ts
 ## 注意事项
 
 1. **Source Map 文件**：确保提供的 Source Map 文件地址可访问，且文件格式正确。
-2. **上下文行数**：`ctxOffset` 参数控制提取的上下文行数，建议根据实际需求调整。
-3. **错误处理**：解析过程中可能会遇到网络错误、文件格式错误等问题，建议在调用时做好错误处理。
+2. **错误处理**：解析过程中可能会遇到网络错误、文件格式错误等问题，建议在调用时做好错误处理。
 
 ## 贡献指南
 

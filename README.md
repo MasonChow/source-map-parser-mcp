@@ -1,8 +1,10 @@
 # Source Map Parser
 
-[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
-
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
+
+<a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
+</a>
 
 This project implements a WebAssembly-based Source Map parser that can map JavaScript error stack traces back to source code and extract relevant context information. Developers can easily map JavaScript error stack traces back to source code for quick problem identification and resolution. This documentation aims to help developers better understand and use this tool.
 
@@ -62,7 +64,6 @@ Parse stack information by providing stack traces and Source Map addresses.
   - line: Line number, required.
   - column: Column number, required.
   - sourceMapUrl: Source Map address, required.
-- ctxOffset: Context line count, default value is 5.
 
 ```json
 {
@@ -72,8 +73,7 @@ Parse stack information by providing stack traces and Source Map addresses.
       "column": 5,
       "sourceMapUrl": "https://example.com/source.map"
     }
-  ],
-  "ctxOffset": 5
+  ]
 }
 ```
 
@@ -167,8 +167,7 @@ In the `server.ts` file, new tool interfaces can be added using the `server.tool
 ## Notes
 
 1. **Source Map Files**: Ensure that the provided Source Map file address is accessible and the file format is correct.
-2. **Context Line Count**: The `ctxOffset` parameter controls the number of context lines extracted; adjust according to actual needs.
-3. **Error Handling**: During parsing, network errors, file format errors, and other issues may be encountered; it's recommended to implement proper error handling when making calls.
+2. **Error Handling**: During parsing, network errors, file format errors, and other issues may be encountered; it's recommended to implement proper error handling when making calls.
 
 ## Contribution Guidelines
 
