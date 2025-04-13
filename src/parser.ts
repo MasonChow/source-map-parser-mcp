@@ -1,4 +1,5 @@
 import { stackParserJsSdk } from './external/index.js';
+import fetch from './cachingFetch'
 interface Stack {
   /** Line number in the stack trace */
   line: number;
@@ -104,13 +105,55 @@ class Parser {
    * @returns A batch parse result containing success or failure for each stack trace.
    */
   public async batchParseStack(stackArr: Stack[], contextOffsetLine?: number): Promise<BatchParseResult> {
+    if (!stackArr.length) return [];
+
+    // Ensure initialization is complete
+    await this.init();
+
     const result: BatchParseResult = [];
 
-    await Promise.all(stackArr.map(async (stack, idx) => {
+    // Step 1: Get all necessary source map contents, eliminating duplicates
+    const uniqueUrls = [...new Set(stackArr.map(stack => stack.sourceMapUrl))];
+    const sourceMapMap = new Map<string, string>();
+    const sourceMapErrors = new Map<string, Error>();
+    // Fetch all unique source maps in parallel
+    await Promise.all(uniqueUrls.map(async (url) => {
       try {
-        const sourceMapContent = await this.fetchSourceMapContent(stack.sourceMapUrl);
-        const token = await this.getSourceToken(stack.line, stack.column, sourceMapContent, contextOffsetLine);
+        const content = await this.fetchSourceMapContent(url);
+        sourceMapMap.set(url, content);
+      } catch (error) {
+        sourceMapErrors.set(url, error instanceof Error
+          ? error
+          : new Error("fetch source map error: " + error));
+      }
+    }));
 
+    // Step 2: Generate tokens using the fetched source map contents
+    await Promise.all(stackArr.map(async (stack, idx) => {
+      // If source map fetch failed, return an error directly
+      if (sourceMapErrors.has(stack.sourceMapUrl)) {
+        result[idx] = {
+          success: false,
+          error: new Error("parse token error: source map fetch failed", {
+            cause: sourceMapErrors.get(stack.sourceMapUrl)
+          })
+        };
+        return;
+      }
+
+      // Use the fetched source map content
+      const sourceMapContent = sourceMapMap.get(stack.sourceMapUrl);
+      if (!sourceMapContent) {
+        result[idx] = {
+          success: false,
+          error: new Error("parse token error: source map content not found")
+        };
+        return;
+      }
+
+      try {
+        // Use the dedicated method to get the token
+        const token = await this.getSourceToken(stack.line, stack.column, sourceMapContent, contextOffsetLine);
         result[idx] = {
           success: true,
           token,
@@ -120,14 +163,13 @@ class Parser {
           success: false,
           error: new Error("parse token error: " + (error instanceof Error ? error.message : error), {
             cause: error,
-          }),
-        }
+          })
+        };
       }
     }));
 
     return result;
   }
-
   /**
    * Parses a single stack trace object and returns the corresponding token.
    * 
