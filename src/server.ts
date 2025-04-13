@@ -2,9 +2,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import packageJson from "../package.json";
-import parser from "./parser";
+import Parser from "./parser";
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
+const parser = new Parser({
+  contextOffsetLine: process.env.SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE ? parseInt(process.env.SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE) : 1,
+});
 
 const server = new McpServer({
   name: packageJson.name,
@@ -80,12 +84,9 @@ server.tool("parse_stack", `
         description: "The URL of the source map file corresponding to the stack trace.",
       }),
     })
-  ),
-  ctxOffset: z.number({
-    description: "The number of additional context lines to include before and after the error location in the source code.",
-  }).optional().default(5),
-}, async ({ stacks, ctxOffset }) => {
-  const parserRes = await parser.batchParseStack(stacks, ctxOffset);
+  )
+}, async ({ stacks }) => {
+  const parserRes = await parser.batchParseStack(stacks);
 
   if (parserRes.length === 0) {
     return {

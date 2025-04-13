@@ -24,6 +24,22 @@ Download the corresponding version of the build artifacts from the [GitHub Relea
 node dist/main.es.js
 ```
 
+### Runtime Parameter Configuration
+
+> System runtime parameters can be flexibly configured through environment variables to meet the needs of different scenarios
+
+- `SOURCE_MAP_PARSER_RESOURCE_CACHE_MAX_SIZE`: Sets the maximum memory space occupied by resource cache, default is 200MB. Adjusting this value appropriately can balance performance and memory usage.
+- `SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE`: Defines the number of context code lines to display around the error location, default is 1 line. Increasing this value provides more context information, facilitating problem diagnosis.
+
+**Example:**
+
+```bash
+# Set 500MB cache and display 3 lines of context
+export SOURCE_MAP_PARSER_RESOURCE_CACHE_MAX_SIZE=500
+export SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE=3
+npx -y source-map-parser-mcp@latest
+```
+
 ## Feature Overview
 
 1. **Stack Parsing**: Parse the corresponding source code location based on provided line number, column number, and Source Map file.

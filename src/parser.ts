@@ -49,6 +49,16 @@ class Parser {
   /** Indicates whether the parser has been initialized */
   private isInit = false;
 
+  /** Context offset line for source code */
+  private contextOffsetLine: number;
+
+  constructor(config: {
+    /** Context offset line for source code */
+    contextOffsetLine?: number;
+  } = {}) {
+    this.contextOffsetLine = config.contextOffsetLine || 1;
+  }
+
   /**
    * Initializes the parser by loading necessary dependencies.
    * This method ensures initialization is performed only once.
@@ -104,7 +114,7 @@ class Parser {
    * @param stackArr - An array of stack trace objects to parse.
    * @returns A batch parse result containing success or failure for each stack trace.
    */
-  public async batchParseStack(stackArr: Stack[], contextOffsetLine?: number): Promise<BatchParseResult> {
+  public async batchParseStack(stackArr: Stack[]): Promise<BatchParseResult> {
     if (!stackArr.length) return [];
 
     // Ensure initialization is complete
@@ -153,7 +163,7 @@ class Parser {
 
       try {
         // Use the dedicated method to get the token
-        const token = await this.getSourceToken(stack.line, stack.column, sourceMapContent, contextOffsetLine);
+        const token = await this.getSourceToken(stack.line, stack.column, sourceMapContent);
         result[idx] = {
           success: true,
           token,
@@ -176,9 +186,9 @@ class Parser {
    * @param stack - The stack trace object to parse.
    * @returns A parsed token object.
    */
-  public async praseStack(stack: Stack, contextOffsetLine?: number): Promise<Token> {
+  public async praseStack(stack: Stack): Promise<Token> {
     const sourceMapContent = await this.fetchSourceMapContent(stack.sourceMapUrl);
-    return this.getSourceToken(stack.line, stack.column, sourceMapContent, contextOffsetLine);
+    return this.getSourceToken(stack.line, stack.column, sourceMapContent);
   }
 
   /**
@@ -190,11 +200,11 @@ class Parser {
    * @returns A parsed token object.
    * @throws An error if the token generation fails.
    */
-  public async getSourceToken(line: number, column: number, sourceMap: string, contextOffsetLine?: number): Promise<Token> {
+  public async getSourceToken(line: number, column: number, sourceMap: string): Promise<Token> {
     await this.init();
 
     try {
-      const res = await stackParserJsSdk.generate_token_by_single_stack(line, column, sourceMap, contextOffsetLine);
+      const res = await stackParserJsSdk.generate_token_by_single_stack(line, column, sourceMap, this.contextOffsetLine);
       return JSON.parse(res) satisfies Token;
 
     } catch (error) {
@@ -204,5 +214,4 @@ class Parser {
     }
   }
 }
-
-export default new Parser();
+export default Parser;

@@ -24,10 +24,26 @@ npx -y source-map-parser-mcp@latest
 node dist/main.es.js
 ```
 
+### 运行参数配置
+
+> 通过环境变量可灵活配置系统运行参数，满足不同场景需求
+
+- `SOURCE_MAP_PARSER_RESOURCE_CACHE_MAX_SIZE`：设置资源缓存占用的最大内存空间，默认为 200MB。适当调整此值可平衡性能与内存占用。
+- `SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE`：定义错误位置周围需显示的上下文代码行数，默认为 1 行。增大此值可获取更多上下文信息，便于问题诊断。
+
+**示例：**
+
+```bash
+# 设置 500MB 缓存并显示 3 行上下文
+export SOURCE_MAP_PARSER_RESOURCE_CACHE_MAX_SIZE=500
+export SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE=3
+npx -y source-map-parser-mcp@latest
+```
+
 ## 功能概述
 
 1. **堆栈解析**：根据提供的行号、列号和 Source Map 文件，解析出对应的源代码位置。
-2. **批量解析**：支持同时解析多个堆栈信息，返回批量结果。
+2. **批量解析**：**支持同时解析多个堆栈信息**，返回批量结果。
 3. **上下文提取**：可以提取指定行数的上下文代码，帮助开发者更好地理解错误发生的环境。
 
 ## MCP 服务工具说明
@@ -45,7 +61,6 @@ node dist/main.es.js
 - stacks ：堆栈信息，包含行号、列号和 Source Map 地址。
   - line ：行号，必填。
   - column ：列号，必填。
-  -
 - ctxOffset ：上下文行数，默认值为 5。
 
 ```json
