@@ -49,6 +49,7 @@ The content is organized as follows:
 
 <directory_structure>
 src/
+  cachingFetch.ts
   main.ts
   parser.ts
   server.ts
@@ -57,6 +58,82 @@ README.md
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="src/cachingFetch.ts">
+// Cache entry type
+interface CacheEntry {
+  url: string;
+  etag: string;
+  data: Buffer;
+  size: number;
+  lastAccessed: number;
+}
+// Memory cache manager
+class MemoryCacheManager
+⋮----
+private readonly maxSize: number = 200 * 1024 * 1024; // 200MB in bytes
+constructor()
+// Get cache entry
+public get(url: string): CacheEntry | null
+⋮----
+// Update last accessed time
+⋮----
+// Set cache entry
+public set(url: string, data: Buffer, etag: string): void
+⋮----
+// If adding a new entry would exceed the maximum cache size, clean up space first
+⋮----
+// If entry already exists, update the cache size first
+⋮----
+// Create new cache entry
+⋮----
+// Save to memory
+⋮----
+// Clean up cache to free up space
+private cleanup(neededSpace: number): void
+⋮----
+// If a single request already exceeds the maximum cache size, it cannot be cached
+⋮----
+// Sort by last accessed time
+⋮----
+// Remove oldest entries until there is enough space
+⋮----
+// Get current cache size information
+public getStats():
+// Clear cache
+public clear(): void
+⋮----
+// Global cache manager instance
+⋮----
+/**
+ * Enhanced fetch function that supports ETag-based memory caching
+ * @param url Request URL
+ * @param options Fetch options
+ * @returns Promise<Response>
+ */
+export async function cachingFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response>
+⋮----
+// Only cache GET requests
+⋮----
+// Try to get cache entry
+⋮----
+// If there is a cache, add If-None-Match header
+⋮----
+// Send request
+⋮----
+// Handle 304 Not Modified response
+⋮----
+// Create new response from cache
+⋮----
+// If the response is successful and has an ETag header, cache the response
+⋮----
+// Also export the cache manager to allow access to cache statistics or manual cache clearing when needed
+⋮----
+// Export the enhanced fetch function
+</file>
 
 <file path="src/main.ts">
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -75,6 +152,7 @@ import path from 'node:path';
 
 <file path="src/parser.ts">
 import { stackParserJsSdk } from './external/index.js';
+import fetch from './cachingFetch'
 interface Stack {
   /** Line number in the stack trace */
   line: number;
@@ -171,6 +249,21 @@ private async fetchSourceMapContent(url: string)
    * @returns A batch parse result containing success or failure for each stack trace.
    */
 public async batchParseStack(stackArr: Stack[], contextOffsetLine?: number): Promise<BatchParseResult>
+⋮----
+// Ensure initialization is complete
+⋮----
+// Step 1: Get all necessary source map contents, eliminating duplicates
+⋮----
+// Fetch all unique source maps in parallel
+⋮----
+// Step 2: Generate tokens using the fetched source map contents
+⋮----
+// If source map fetch failed, return an error directly
+⋮----
+// Use the fetched source map content
+⋮----
+// Use the dedicated method to get the token
+⋮----
 /**
    * Parses a single stack trace object and returns the corresponding token.
    * 
@@ -192,6 +285,8 @@ public async getSourceToken(line: number, column: number, sourceMap: string, con
 
 <file path="README.md">
 # Source Map Parser
+
+[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
 
 🌐 **Languages**: [English](README.md) | [简体中文](README.zh-CN.md)
 
