@@ -2,39 +2,51 @@
 
 [![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
 
-🌐 **Languages**: [English](README.md) | [简体中文](README.zh-CN.md)
+🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
 
-This project implements a WebAssembly-based Source Map parser that maps JavaScript error stack traces back to the original source code and extracts relevant context information. Developers can easily locate and fix issues by mapping JavaScript error stack traces to the original source code. We hope this documentation helps developers better understand and use this tool.
+This project implements a WebAssembly-based Source Map parser that can map JavaScript error stack traces back to source code and extract relevant context information. Developers can easily map JavaScript error stack traces back to source code for quick problem identification and resolution. This documentation aims to help developers better understand and use this tool.
 
 ## MCP Integration
 
-> Note: The minimum required Node.js version is 18+.
+> Note: Requires Node.js 18+ support
 
-`npx -y source-map-parser-mcp@latest`
+Option 1: Run directly with NPX
 
-## Features
+```bash
+npx -y source-map-parser-mcp@latest
+```
 
-1. **Stack Trace Parsing**: Parse the corresponding source code location based on the provided line number, column number, and Source Map file.
-2. **Batch Parsing**: Support parsing multiple stack traces simultaneously and return batch results.
-3. **Context Extraction**: Extract a specified number of context lines to help developers better understand the environment where the error occurred.
+Option 2: Download the build artifacts
 
-## MCP Service Tools
+Download the corresponding version of the build artifacts from the [GitHub Release](https://github.com/MasonChow/source-map-parser-mcp/releases) page, then run:
+
+```bash
+node dist/main.es.js
+```
+
+## Feature Overview
+
+1. **Stack Parsing**: Parse the corresponding source code location based on provided line number, column number, and Source Map file.
+2. **Batch Processing**: Support parsing multiple stack traces simultaneously and return batch results.
+3. **Context Extraction**: Extract context code for a specified number of lines to help developers better understand the environment where errors occur.
+
+## MCP Service Tool Description
 
 ### `operating_guide`
 
-Retrieve the usage guide for the MCP service. This tool provides an interactive way to understand how to use the MCP service.
+Get usage instructions for the MCP service. Provides information on how to use the MCP service through chat interaction.
 
 ### `parse_stack`
 
-Parse stack trace information and Source Map URLs.
+Parse stack information by providing stack traces and Source Map addresses.
 
 #### Request Example
 
-- `stacks`: Stack trace information, including line number, column number, and Source Map URL.
-  - `line`: Line number (required).
-  - `column`: Column number (required).
-  - `sourceMapUrl`: URL of the Source Map file (required).
-- `ctxOffset`: Number of context lines (default is 5).
+- stacks: Stack information including line number, column number, and Source Map address.
+  - line: Line number, required.
+  - column: Column number, required.
+  - sourceMapUrl: Source Map address, required.
+- ctxOffset: Context line count, default value is 5.
 
 ```json
 {
@@ -62,42 +74,42 @@ Parse stack trace information and Source Map URLs.
 }
 ```
 
-### 4. Parsing Result Explanation
+### Parsing Result Description
 
 - `success`: Indicates whether the parsing was successful.
-- `token`: The parsed token object returned upon successful parsing, including source code line number, column number, context code, etc.
+- `token`: The Token object returned when parsing is successful, containing source code line number, column number, context code, and other information.
 - `error`: Error information returned when parsing fails.
 
 ## Advanced Usage
 
-For security or performance reasons, some teams may prefer not to expose Source Maps directly to the browser for parsing. Instead, they preprocess the upload paths of Source Maps. For example, the path `/assets/index.js` can be transformed into `source_backup/index.js.map`.
+Some teams, for security or performance reasons, may not want to expose Source Maps directly to browsers for parsing, and instead process the Source Map upload paths. For example, converting path `/assets/index.js` to `source_backup/index.js.map`.
 
-In such cases, you can guide the model to complete the path transformation using prompt-based rules.
+In such cases, prompt rules can guide the model to complete path conversion.
 
 ### Prompt Example
 
 ```markdown
 **Source Map Tool Usage Guide**
 
-Below are the rules for resolving remote Source Map URLs, where `origin_url` represents the error path in the stack trace.
+The following are the parsing rules for Source Map remote addresses, where `origin_url` represents the error address in the stack.
 
-1. Replace the Source Map resource URL based on the source path in the stack trace:
+1. Replace the resource address of the Source Map based on the source path in the stack:
    `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
 
-2. If no matching rule is found, use the following fallback rule:
-   `${origin_url}.map` and retry.
+2. If all rules fail to match, use the following fallback rule:
+   `${origin_url}.map` and try again.
 ```
 
 ## FAQ
 
 ### 1. WebAssembly Module Loading Failure
 
-If the tool returns the following error message, follow these steps to troubleshoot:
+If the tool returns the following error message, please troubleshoot as follows:
 
 > parser init error: WebAssembly.instantiate(): invalid value type 'externref', enable with --experimental-wasm-reftypes @+86
 
-1. **Check Node.js Version**: Ensure that the Node.js version is 18 or higher. If it is lower than 18, upgrade Node.js.
-2. **Enable Experimental Flag**: If the Node.js version is 18+ but the issue persists, start the tool with the following command:
+1. **Check Node.js Version**: Ensure Node.js version is 18 or higher. If it's lower than 18, please upgrade Node.js.
+2. **Enable Experimental Flag**: If Node.js version is 18+ but you still encounter issues, use the following command to start the tool:
    ```bash
    npx --node-arg=--experimental-wasm-reftypes -y source-map-parser-mcp@latest
    ```
@@ -122,10 +134,10 @@ npx tsx src/main.ts
 
 ### Internal Logic Overview
 
-#### 1. Key Files
+#### 1. Main File Description
 
-- **`stack_parser_js_sdk.js`**: JavaScript wrapper for the WebAssembly module, providing core functionality for stack trace parsing.
-- **`parser.ts`**: Main implementation of the parser, responsible for initializing the WebAssembly module, fetching Source Map content, and parsing stack trace information.
+- **`stack_parser_js_sdk.js`**: JavaScript wrapper for the WebAssembly module, providing core stack parsing functionality.
+- **`parser.ts`**: Main implementation of the parser, responsible for initializing the WebAssembly module, retrieving Source Map content, and parsing stack information.
 - **`server.ts`**: Implementation of the MCP server, providing the `parse_stack` tool interface for external calls.
 
 #### 2. Modify Parsing Logic
@@ -134,18 +146,18 @@ To modify the parsing logic, edit the `getSourceToken` method in the `parser.ts`
 
 #### 3. Add New Tools
 
-In the `server.ts` file, you can add new tool interfaces using the `server.tool` method.
+In the `server.ts` file, new tool interfaces can be added using the `server.tool` method.
 
 ## Notes
 
-1. **Source Map Files**: Ensure the provided Source Map file URL is accessible and the file format is correct.
-2. **Context Lines**: The `ctxOffset` parameter controls the number of context lines to extract. Adjust it based on your needs.
-3. **Error Handling**: Parsing may encounter issues such as network errors or file format errors. It is recommended to handle errors appropriately when calling the tool.
+1. **Source Map Files**: Ensure that the provided Source Map file address is accessible and the file format is correct.
+2. **Context Line Count**: The `ctxOffset` parameter controls the number of context lines extracted; adjust according to actual needs.
+3. **Error Handling**: During parsing, network errors, file format errors, and other issues may be encountered; it's recommended to implement proper error handling when making calls.
 
-## Contribution Guide
+## Contribution Guidelines
 
-We welcome Issues and Pull Requests to improve this project together.
+Contributions via Issues and Pull Requests are welcome to improve this project.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.

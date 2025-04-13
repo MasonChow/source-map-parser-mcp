@@ -8,9 +8,21 @@
 
 ## MCP 串接
 
-> 注意 node 版本最低要 18+
+> 注意: 需要 Node.js 18+ 版本支持
 
-`npx -y source-map-parser-mcp@latest`
+方式一：NPX 直接运行
+
+```bash
+npx -y source-map-parser-mcp@latest
+```
+
+方式二：下载构建产物
+
+从 [GitHub Release](https://github.com/MasonChow/source-map-parser-mcp/releases) 页面下载对应版本的构建产物，然后运行：
+
+```bash
+node dist/main.es.js
+```
 
 ## 功能概述
 
