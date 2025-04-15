@@ -180,5 +180,3 @@ Contributions via Issues and Pull Requests are welcome to improve this project.
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-[url-npm]: https://www.npmjs.com/package/rolldown/v/latest
