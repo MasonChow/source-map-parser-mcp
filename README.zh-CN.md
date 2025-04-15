@@ -2,6 +2,8 @@
 
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
 
+[![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
+
 <a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
 </a>

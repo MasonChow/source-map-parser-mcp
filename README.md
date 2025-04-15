@@ -2,6 +2,10 @@
 
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
 
+[![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
+[![NPM Unpacked Size (with version)](https://img.shields.io/npm/unpacked-size/source-map-parser-mcp/latest?label=npm&color=brightgreen)][url-npm]
+[![Code Coverage](https://codecov.io/github/MasonChow/source-map-parser-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/github/MasonChow/source-map-parser-mcp)
+
 <a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
 </a>
@@ -176,3 +180,5 @@ Contributions via Issues and Pull Requests are welcome to improve this project.
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
+[url-npm]: https://www.npmjs.com/package/rolldown/v/latest
