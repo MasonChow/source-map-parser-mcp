@@ -32,6 +32,12 @@ jobs:
       - name: Test project
         run: npm run test:ci
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: MasonChow/source-map-parser-mcp
+
   release:
     name: Release
     needs: test
