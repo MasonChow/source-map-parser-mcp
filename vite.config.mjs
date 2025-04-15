@@ -25,7 +25,6 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       enabled: true,
-      reporter: ['text', 'html'],
       all: true,
       include: ['src/**/*.ts'],
       exclude: ['**/*.test.ts', 'src/external/**', 'src/main.ts'],
