@@ -20,4 +20,14 @@ export default defineConfig({
       ],
     },
   },
+  test: {
+    include: ['./tests/**/*.test.ts'],
+    environment: 'node',
+    coverage: {
+      enabled: true,
+      all: true,
+      include: ['src/**/*.ts'],
+      exclude: ['**/*.test.ts', 'src/external/**', 'src/main.ts'],
+    },
+  },
 });
