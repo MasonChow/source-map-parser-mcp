@@ -2,13 +2,12 @@
 
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
 
-![](https://badge.mcpx.dev?type=server&features=tools 'MCP server with tools')
-
 [![Node Version](https://img.shields.io/node/v/source-map-parser-mcp)](https://nodejs.org)
 [![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
 [![Downloads](https://img.shields.io/npm/dm/source-map-parser-mcp)](https://npmjs.com/package/source-map-parser-mcpb)
 [![Build Status](https://github.com/ZephyrDeng/mcp-server-gitlab/actions/workflows/ci.yml/badge.svg)](https://github.com/ZephyrDeng/mcp-server-gitlab/actions)
 [![codecov](https://codecov.io/gh/MasonChow/source-map-parser-mcp/graph/badge.svg)](https://codecov.io/gh/MasonChow/source-map-parser-mcp)
+![](https://badge.mcpx.dev?type=server&features=tools 'MCP server with tools')
 
 <a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
