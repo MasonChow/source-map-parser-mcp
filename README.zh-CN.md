@@ -102,25 +102,48 @@ npx -y source-map-parser-mcp@latest
 - `token`：解析成功时返回的 Token 对象，包含源代码行号、列号、上下文代码等信息。
 - `error`：解析失败时返回的错误信息。
 
-## 进阶用法
+## 运行示例
 
-部分团队出于安全性或性能考虑，不希望直接将 Source Map 暴露给浏览器进行解析，而是对 Source Map 的上传路径进行一定的处理。例如，将路径 `/assets/index.js` 转换为 `source_backup/index.js.map`。
+### 系统提示词
 
-在这种情况下，可以通过提示词规则引导模型完成路径转换。
+根据实际需求，可以通过系统提示词引导模型如何解析堆栈信息。部分团队出于安全性或性能考虑，不希望直接将 Source Map 暴露给浏览器解析，而是对 Source Map 的上传路径进行处理。例如，将路径 `bar-special.js` 转换为 `special/bar.js.map`。此时，可以通过提示词规则指导模型完成路径转换。
 
-### 提示词示例
+以下是一个示例：
 
 ```markdown
-**Source Map 工具使用指南**
+# 错误堆栈解析规则
 
-以下是 Source Map 远程地址的解析规则，其中 `origin_url` 表示堆栈中的错误地址。
+在进行 source map 解析时，请遵循以下规则：
 
-1. 根据堆栈的源码路径，替换 Source Map 的资源地址：
-   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+1. 如果 URL 中包含 `special`，则需将文件解析到 `special/` 目录下，并移除文件名中的 `-special`。
+2. 所有 source map 文件均存放于以下 CDN 目录：  
+   `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/`
 
-2. 如果所有规则均未匹配成功，则使用以下回退规则：
-   `${origin_url}.map` 并重新尝试。
+## 示例
+
+- `bar-special.js` 的 source map 地址为：  
+  `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/special/bar.js.map`
 ```
+
+### 运行效果
+
+错误堆栈
+
+```
+Uncaught Error: This is a error
+    at foo-special.js:49:34832
+    at ka (foo-special.js:48:83322)
+    at Vs (foo-special.js:48:98013)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98749)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98059)
+    at sv (foo-special.js:48:110550)
+    at foo-special.js:48:107925
+    at MessagePort.Ot (foo-special.js:25:1635)
+```
+
+![运行效果](./example/example_cn.png)
 
 ## FAQ
 

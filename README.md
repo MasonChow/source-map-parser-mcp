@@ -103,25 +103,48 @@ Parse stack information by providing stack traces and Source Map addresses.
 - `token`: The Token object returned when parsing is successful, containing source code line number, column number, context code, and other information.
 - `error`: Error information returned when parsing fails.
 
-## Advanced Usage
+## Example Run
 
-Some teams, for security or performance reasons, may not want to expose Source Maps directly to browsers for parsing, and instead process the Source Map upload paths. For example, converting path `/assets/index.js` to `source_backup/index.js.map`.
+### System Prompt
 
-In such cases, prompt rules can guide the model to complete path conversion.
+According to actual needs, you can use system prompts to guide the model on how to parse stack information. For security or performance reasons, some teams may not want to expose Source Maps directly to the browser for parsing, but instead process the upload path of the Source Map. For example, converting the path `bar-special.js` to `special/bar.js.map`. In this case, you can instruct the model to perform path conversion through prompt rules.
 
-### Prompt Example
+Here is an example:
 
 ```markdown
-**Source Map Tool Usage Guide**
+# Error Stack Trace Parsing Rules
 
-The following are the parsing rules for Source Map remote addresses, where `origin_url` represents the error address in the stack.
+When performing source map parsing, please follow these rules:
 
-1. Replace the resource address of the Source Map based on the source path in the stack:
-   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+1. If the URL contains `special`, the file should be parsed into the `special/` directory, while removing `-special` from the filename.
+2. All source map files are stored in the following CDN directory:  
+   `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/`
 
-2. If all rules fail to match, use the following fallback rule:
-   `${origin_url}.map` and try again.
+## Examples
+
+- Source map address for `bar-special.js`:  
+  `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/special/bar.js.map`
 ```
+
+### Runtime Example
+
+Error Stack
+
+```
+Uncaught Error: This is a error
+    at foo-special.js:49:34832
+    at ka (foo-special.js:48:83322)
+    at Vs (foo-special.js:48:98013)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98749)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98059)
+    at sv (foo-special.js:48:110550)
+    at foo-special.js:48:107925
+    at MessagePort.Ot (foo-special.js:25:1635)
+```
+
+![Runtime Example](./example/example_en.png)
 
 ## FAQ
 
