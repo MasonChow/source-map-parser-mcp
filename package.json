@@ -1,6 +1,6 @@
 {
   "name": "source-map-parser-mcp",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -17,7 +17,8 @@
   "files": [
     "dist",
     "LICENSE",
-    "README.md"
+    "README.md",
+    "README.zh-CN.md"
   ],
   "keywords": [],
   "author": "MasonChow <masonchat@foxmail.com>",

@@ -54,6 +54,9 @@ src/
   memoryCacheManager.ts
   parser.ts
   server.ts
+tests/
+  client.test.ts
+  memoryCacheManager.test.ts
 README.md
 </directory_structure>
 
@@ -127,6 +130,27 @@ public getStats():
 public clear(): void
 </file>
 
+<file path="tests/client.test.ts">
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { afterAll, beforeAll, expect, test } from 'vitest';
+</file>
+
+<file path="tests/memoryCacheManager.test.ts">
+import { describe, it, expect, beforeEach } from 'vitest';
+import MemoryCacheManager from '../src/memoryCacheManager';
+⋮----
+cache = new MemoryCacheManager({ maxSize: 1 }); // 1MB for testing
+⋮----
+// Wait a bit and get again
+⋮----
+// maxSize = 1MB, each buffer is 600KB
+⋮----
+cache.set('b', bufB, 'etag-b'); // should evict 'a'
+⋮----
+const bigBuf = Buffer.alloc(2 * 1024 * 1024, 1); // 2MB
+</file>
+
 <file path="src/cachingFetch.ts">
 import MemoryCacheManager from './memoryCacheManager';
 // Read cache size from environment variable or use default value
@@ -168,7 +192,7 @@ export async function cachingFetch(
 <file path="src/main.ts">
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import server from './server';
-const main = async () =>
+export const main = async () =>
 </file>
 
 <file path="src/server.ts">
@@ -325,9 +349,18 @@ public async getSourceToken(line: number, column: number, sourceMap: string): Pr
 <file path="README.md">
 # Source Map Parser
 
-[![smithery badge](https://smithery.ai/badge/@MasonChow/source-map-parser-mcp)](https://smithery.ai/server/@MasonChow/source-map-parser-mcp)
-
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
+
+[![Node Version](https://img.shields.io/node/v/source-map-parser-mcp)](https://nodejs.org)
+[![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
+[![Downloads](https://img.shields.io/npm/dm/source-map-parser-mcp)](https://npmjs.com/package/source-map-parser-mcp)
+[![Build Status](https://github.com/MasonChow/source-map-parser-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/MasonChow/source-map-parser-mcp/actions)
+[![codecov](https://codecov.io/gh/MasonChow/source-map-parser-mcp/graph/badge.svg)](https://codecov.io/gh/MasonChow/source-map-parser-mcp)
+![](https://badge.mcpx.dev?type=server&features=tools 'MCP server with tools')
+
+<a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
+</a>
 
 This project implements a WebAssembly-based Source Map parser that can map JavaScript error stack traces back to source code and extract relevant context information. Developers can easily map JavaScript error stack traces back to source code for quick problem identification and resolution. This documentation aims to help developers better understand and use this tool.
 
@@ -358,11 +391,12 @@ node dist/main.es.js
 
 **Example:**
 
-````bash
+```bash
 # Set 500MB cache and display 3 lines of context
 export SOURCE_MAP_PARSER_RESOURCE_CACHE_MAX_SIZE=500
 export SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE=3
 npx -y source-map-parser-mcp@latest
+```
 
 ## Feature Overview
 
@@ -386,7 +420,6 @@ Parse stack information by providing stack traces and Source Map addresses.
   - line: Line number, required.
   - column: Column number, required.
   - sourceMapUrl: Source Map address, required.
-- ctxOffset: Context line count, default value is 5.
 
 ```json
 {
@@ -396,10 +429,9 @@ Parse stack information by providing stack traces and Source Map addresses.
       "column": 5,
       "sourceMapUrl": "https://example.com/source.map"
     }
-  ],
-  "ctxOffset": 5
+  ]
 }
-````
+```
 
 #### Response Example
 
@@ -420,25 +452,48 @@ Parse stack information by providing stack traces and Source Map addresses.
 - `token`: The Token object returned when parsing is successful, containing source code line number, column number, context code, and other information.
 - `error`: Error information returned when parsing fails.
 
-## Advanced Usage
+## Example Run
 
-Some teams, for security or performance reasons, may not want to expose Source Maps directly to browsers for parsing, and instead process the Source Map upload paths. For example, converting path `/assets/index.js` to `source_backup/index.js.map`.
+### System Prompt
 
-In such cases, prompt rules can guide the model to complete path conversion.
+According to actual needs, you can use system prompts to guide the model on how to parse stack information. For security or performance reasons, some teams may not want to expose Source Maps directly to the browser for parsing, but instead process the upload path of the Source Map. For example, converting the path `bar-special.js` to `special/bar.js.map`. In this case, you can instruct the model to perform path conversion through prompt rules.
 
-### Prompt Example
+Here is an example:
 
 ```markdown
-**Source Map Tool Usage Guide**
+# Error Stack Trace Parsing Rules
 
-The following are the parsing rules for Source Map remote addresses, where `origin_url` represents the error address in the stack.
+When performing source map parsing, please follow these rules:
 
-1. Replace the resource address of the Source Map based on the source path in the stack:
-   `https://example.com${origin_url.replace('/assets/', '/source_backup/')}.map`
+1. If the URL contains `special`, the file should be parsed into the `special/` directory, while removing `-special` from the filename.
+2. All source map files are stored in the following CDN directory:  
+   `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/`
 
-2. If all rules fail to match, use the following fallback rule:
-   `${origin_url}.map` and try again.
+## Examples
+
+- Source map address for `bar-special.js`:  
+  `https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/special/bar.js.map`
 ```
+
+### Runtime Example
+
+Error Stack
+
+```
+Uncaught Error: This is a error
+    at foo-special.js:49:34832
+    at ka (foo-special.js:48:83322)
+    at Vs (foo-special.js:48:98013)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98749)
+    at Et (foo-special.js:48:97897)
+    at Vs (foo-special.js:48:98059)
+    at sv (foo-special.js:48:110550)
+    at foo-special.js:48:107925
+    at MessagePort.Ot (foo-special.js:25:1635)
+```
+
+![Runtime Example](./example/example_en.png)
 
 ## FAQ
 
@@ -491,8 +546,7 @@ In the `server.ts` file, new tool interfaces can be added using the `server.tool
 ## Notes
 
 1. **Source Map Files**: Ensure that the provided Source Map file address is accessible and the file format is correct.
-2. **Context Line Count**: The `ctxOffset` parameter controls the number of context lines extracted; adjust according to actual needs.
-3. **Error Handling**: During parsing, network errors, file format errors, and other issues may be encountered; it's recommended to implement proper error handling when making calls.
+2. **Error Handling**: During parsing, network errors, file format errors, and other issues may be encountered; it's recommended to implement proper error handling when making calls.
 
 ## Contribution Guidelines
 
