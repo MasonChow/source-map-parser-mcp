@@ -143,7 +143,7 @@ Uncaught Error: This is a error
     at MessagePort.Ot (foo-special.js:25:1635)
 ```
 
-![运行效果](./example/example_cn.png)
+![运行效果](https://cdn.jsdelivr.net/gh/MasonChow/source-map-parser-mcp@main/example/example_cn.png)
 
 ## FAQ
 
