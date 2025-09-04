@@ -431,22 +431,11 @@ cache.set('b', bufB, 'etag-b'); // should evict 'a'
 const bigBuf = Buffer.alloc(2 * 1024 * 1024, 1); // 2MB
 </file>
 
+
 <file path="tests/sourcemap-issue.test.ts">
 import { describe, it, expect } from 'vitest';
 import Parser from '../src/parser.js';
-⋮----
 // If it fails due to network issues, that's OK for now
-</file>
-
-<file path="tests/sourcemap-local.test.ts">
-import { describe, it, expect } from 'vitest';
-import Parser from '../src/parser.js';
-import fs from 'fs/promises';
-import path from 'path';
-⋮----
-// Read the local source map file
-⋮----
-// Use the getSourceToken method directly to test the parsing
 </file>
 
 <file path="README.md">
