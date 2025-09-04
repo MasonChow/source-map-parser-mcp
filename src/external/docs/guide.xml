@@ -55,12 +55,34 @@ src/
   server.ts
 tests/
   client.test.ts
+  issue-21-fix.test.ts
   memoryCacheManager.test.ts
+  sourcemap-issue.test.ts
+  sourcemap-local.test.ts
 README.md
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="tests/issue-21-fix.test.ts">
+import { describe, it, expect } from 'vitest';
+import Parser from '../src/parser.js';
+import fs from 'fs/promises';
+import path from 'path';
+⋮----
+// Read the local source map file mentioned in the issue
+⋮----
+// Test the exact stack traces from the issue
+⋮----
+// Verify the token structure is correct
+⋮----
+// Verify sourceCode array contains SourceCode objects with correct structure
+⋮----
+// Use the local source map file for consistent results
+⋮----
+// For file:// URLs, we expect fetch to fail, which is OK
+</file>
 
 <file path="src/types/source_map_parser_node.d.ts">
 export function init(): Promise<void>;
@@ -356,6 +378,12 @@ private validateToken(token: any): asserts token is Token
 // Validate each source code entry
 ⋮----
 /**
+   * Transforms the raw response from WebAssembly module to match the expected Token interface
+   * @param rawToken - The raw token object from WebAssembly (uses snake_case)
+   * @returns Transformed token object matching the Token interface (uses camelCase)
+   */
+private transformToken(rawToken: any): Token
+/**
    * Retrieves the source token for a given line and column in the source map.
    * 
    * @param line - The line number in the source map.
@@ -365,6 +393,8 @@ private validateToken(token: any): asserts token is Token
    * @throws An error if the token generation fails.
    */
 public async getSourceToken(line: number, column: number, sourceMap: string): Promise<Token>
+⋮----
+// Transform the raw token to match the expected interface
 ⋮----
 // Validate the token structure
 </file>
@@ -399,6 +429,13 @@ cache = new MemoryCacheManager({ maxSize: 1 }); // 1MB for testing
 cache.set('b', bufB, 'etag-b'); // should evict 'a'
 ⋮----
 const bigBuf = Buffer.alloc(2 * 1024 * 1024, 1); // 2MB
+</file>
+
+
+<file path="tests/sourcemap-issue.test.ts">
+import { describe, it, expect } from 'vitest';
+import Parser from '../src/parser.js';
+// If it fails due to network issues, that's OK for now
 </file>
 
 <file path="README.md">
