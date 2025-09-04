@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite';
 import packageJSON from './package.json';
 import module from 'node:module';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
+  plugins: [wasm(), topLevelAwait()],
   build: {
     target: 'node20',
     lib: {
@@ -16,7 +19,8 @@ export default defineConfig({
       external: [
         ...module.builtinModules,
         ...module.builtinModules.map((e) => `node:${e}`),
-        './external/index.js',
+        ...Object.keys(packageJSON.dependencies || {}),
+        ...Object.keys(packageJSON.peerDependencies || {}),
       ],
     },
   },
@@ -27,7 +31,7 @@ export default defineConfig({
       enabled: true,
       all: true,
       include: ['src/**/*.ts'],
-      exclude: ['**/*.test.ts', 'src/external/**', 'src/main.ts'],
+      exclude: ['**/*.test.ts', 'src/main.ts'],
     },
   },
 });

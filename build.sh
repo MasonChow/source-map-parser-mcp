@@ -12,15 +12,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Define source and destination directories
-SRC_DIR="src/external"
-DIST_DIR="dist/external"
-
-# Create the destination directory if it does not exist
-mkdir -p "$DIST_DIR"
-
-# Copy the src/external directory to dist/external and overwrite all contents
-cp -r "$SRC_DIR/"* "$DIST_DIR/"
-
-# Output completion message
-echo "Copied $SRC_DIR to $DIST_DIR and overwrote all contents."
+# Note: External directory copying has been removed as we now use source_map_parser_node npm package directly
