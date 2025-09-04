@@ -57,32 +57,11 @@ tests/
   client.test.ts
   issue-21-fix.test.ts
   memoryCacheManager.test.ts
-  sourcemap-issue.test.ts
-  sourcemap-local.test.ts
 README.md
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
-
-<file path="tests/issue-21-fix.test.ts">
-import { describe, it, expect } from 'vitest';
-import Parser from '../src/parser.js';
-import fs from 'fs/promises';
-import path from 'path';
-⋮----
-// Read the local source map file mentioned in the issue
-⋮----
-// Test the exact stack traces from the issue
-⋮----
-// Verify the token structure is correct
-⋮----
-// Verify sourceCode array contains SourceCode objects with correct structure
-⋮----
-// Use the local source map file for consistent results
-⋮----
-// For file:// URLs, we expect fetch to fail, which is OK
-</file>
 
 <file path="src/types/source_map_parser_node.d.ts">
 export function init(): Promise<void>;
@@ -109,50 +88,6 @@ export function map_error_stack(
     errorStack: string,
     contextLines?: number
   ): string;
-</file>
-
-<file path="src/cachingFetch.ts">
-import MemoryCacheManager from './memoryCacheManager';
-// Read cache size from environment variable or use default value
-⋮----
-// Global cache manager instance with size from environment variable
-⋮----
-maxSize: cacheSizeMB // Size in MB
-⋮----
-/**
- * Enhanced fetch function that supports ETag-based memory caching
- * @param url Request URL
- * @param options Fetch options
- * @returns Promise<Response>
- */
-export async function cachingFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response>
-⋮----
-// Only cache GET requests
-⋮----
-// Try to get cache entry
-⋮----
-// If there is a cache, add If-None-Match header
-⋮----
-// Send request
-⋮----
-// Handle 304 Not Modified response
-⋮----
-// Create new response from cache
-⋮----
-// If the response is successful and has an ETag header, cache the response
-⋮----
-// Also export the cache manager to allow access to cache statistics or manual cache clearing when needed
-⋮----
-// Export the enhanced fetch function
-</file>
-
-<file path="src/main.ts">
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import server from './server';
-export const stdio = async () =>
 </file>
 
 <file path="src/memoryCacheManager.ts">
@@ -220,6 +155,101 @@ private cleanup(neededSpace: number): void
 public getStats():
 // Clear cache
 public clear(): void
+</file>
+
+<file path="tests/client.test.ts">
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { afterAll, beforeAll, expect, test } from 'vitest';
+</file>
+
+<file path="tests/issue-21-fix.test.ts">
+import { describe, it, expect } from 'vitest';
+import Parser from '../src/parser.js';
+import fs from 'fs/promises';
+import path from 'path';
+⋮----
+// Read the local source map file mentioned in the issue
+⋮----
+// Test the exact stack traces from the issue
+⋮----
+// Verify the token structure is correct
+⋮----
+// Verify sourceCode array contains SourceCode objects with correct structure
+⋮----
+// Use the local source map file for consistent results
+⋮----
+// For file:// URLs, we expect fetch to fail, which is OK
+</file>
+
+<file path="tests/memoryCacheManager.test.ts">
+import { describe, it, expect, beforeEach } from 'vitest';
+import MemoryCacheManager from '../src/memoryCacheManager';
+⋮----
+cache = new MemoryCacheManager({ maxSize: 1 }); // 1MB for testing
+⋮----
+// Wait a bit and get again
+⋮----
+// maxSize = 1MB, each buffer is 600KB
+⋮----
+cache.set('b', bufB, 'etag-b'); // should evict 'a'
+⋮----
+const bigBuf = Buffer.alloc(2 * 1024 * 1024, 1); // 2MB
+</file>
+
+<file path="src/cachingFetch.ts">
+import MemoryCacheManager from './memoryCacheManager';
+// Read cache size from environment variable or use default value
+⋮----
+// Global cache manager instance with size from environment variable
+⋮----
+maxSize: cacheSizeMB // Size in MB
+⋮----
+/**
+ * Enhanced fetch function that supports ETag-based memory caching
+ * @param url Request URL
+ * @param options Fetch options
+ * @returns Promise<Response>
+ */
+export async function cachingFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response>
+⋮----
+// Only cache GET requests
+⋮----
+// Try to get cache entry
+⋮----
+// If there is a cache, add If-None-Match header
+⋮----
+// Send request
+⋮----
+// Handle 304 Not Modified response
+⋮----
+// Create new response from cache
+⋮----
+// If the response is successful and has an ETag header, cache the response
+⋮----
+// Also export the cache manager to allow access to cache statistics or manual cache clearing when needed
+⋮----
+// Export the enhanced fetch function
+</file>
+
+<file path="src/main.ts">
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import server from './server';
+export const stdio = async () =>
+</file>
+
+<file path="src/server.ts">
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import packageJson from "../package.json";
+import Parser from "./parser";
+import fs from 'node:fs/promises';
+import path from 'node:path';
+⋮----
+// Sanitize error messages to avoid exposing internal details
 </file>
 
 <file path="src/parser.ts">
@@ -397,45 +427,6 @@ public async getSourceToken(line: number, column: number, sourceMap: string): Pr
 // Transform the raw token to match the expected interface
 ⋮----
 // Validate the token structure
-</file>
-
-<file path="src/server.ts">
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import packageJson from "../package.json";
-import Parser from "./parser";
-import fs from 'node:fs/promises';
-import path from 'node:path';
-⋮----
-// Sanitize error messages to avoid exposing internal details
-</file>
-
-<file path="tests/client.test.ts">
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import { afterAll, beforeAll, expect, test } from 'vitest';
-</file>
-
-<file path="tests/memoryCacheManager.test.ts">
-import { describe, it, expect, beforeEach } from 'vitest';
-import MemoryCacheManager from '../src/memoryCacheManager';
-⋮----
-cache = new MemoryCacheManager({ maxSize: 1 }); // 1MB for testing
-⋮----
-// Wait a bit and get again
-⋮----
-// maxSize = 1MB, each buffer is 600KB
-⋮----
-cache.set('b', bufB, 'etag-b'); // should evict 'a'
-⋮----
-const bigBuf = Buffer.alloc(2 * 1024 * 1024, 1); // 2MB
-</file>
-
-
-<file path="tests/sourcemap-issue.test.ts">
-import { describe, it, expect } from 'vitest';
-import Parser from '../src/parser.js';
-// If it fails due to network issues, that's OK for now
 </file>
 
 <file path="README.md">
