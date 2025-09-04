@@ -261,6 +261,24 @@ class Parser {
   }
 
   /**
+   * Transforms the raw response from WebAssembly module to match the expected Token interface
+   * @param rawToken - The raw token object from WebAssembly (uses snake_case)
+   * @returns Transformed token object matching the Token interface (uses camelCase)
+   */
+  private transformToken(rawToken: any): Token {
+    return {
+      line: rawToken.line,
+      column: rawToken.column,
+      src: rawToken.src,
+      sourceCode: rawToken.source_code?.map((sourceCode: any) => ({
+        line: sourceCode.line,
+        isStackLine: sourceCode.is_stack_line,
+        raw: sourceCode.raw
+      })) || []
+    };
+  }
+
+  /**
    * Retrieves the source token for a given line and column in the source map.
    * 
    * @param line - The line number in the source map.
@@ -274,7 +292,10 @@ class Parser {
 
     try {
       const res = sourceMapParser.generate_token_by_single_stack(line, column, sourceMap, this.contextOffsetLine);
-      const token = JSON.parse(res);
+      const rawToken = JSON.parse(res);
+      
+      // Transform the raw token to match the expected interface
+      const token = this.transformToken(rawToken);
       
       // Validate the token structure
       this.validateToken(token);
