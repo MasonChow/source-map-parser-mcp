@@ -1,4 +1,4 @@
-import { stackParserJsSdk } from './external/index.js';
+import * as sourceMapParser from 'source_map_parser_node';
 import fetch from './cachingFetch'
 interface Stack {
   /** Line number in the stack trace */
@@ -45,6 +45,33 @@ const arrayBufferToString = (buffer: ArrayBuffer): string => {
   return decoder.decode(buffer);
 };
 
+/**
+ * Validates a URL to prevent SSRF attacks
+ * @param url - The URL to validate
+ * @throws Error if the URL is invalid or potentially malicious
+ */
+const validateUrl = (url: string): void => {
+  try {
+    const parsedUrl = new URL(url);
+    
+    // Allow only HTTP and HTTPS protocols
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      throw new Error(`Invalid protocol: ${parsedUrl.protocol}. Only HTTP and HTTPS are allowed.`);
+    }
+    
+    // Optional: Add domain allowlist/blocklist here if needed
+    // Example: if (parsedUrl.hostname.endsWith('.internal.company.com')) {
+    //   throw new Error('Access to internal domains is not allowed');
+    // }
+    
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(`Invalid URL format: ${url}`);
+    }
+    throw error;
+  }
+};
+
 class Parser {
   /** Indicates whether the parser has been initialized */
   private isInit = false;
@@ -69,7 +96,7 @@ class Parser {
     }
 
     try {
-      await stackParserJsSdk.default();
+      await sourceMapParser.init();
       this.isInit = true;
     } catch (error) {
       throw new Error("parser init error: " + (error instanceof Error ? error.message : error), {
@@ -83,11 +110,13 @@ class Parser {
    * 
    * @param url - The URL of the source map file.
    * @returns The content of the source map file as a string.
-   * @throws An error if the fetch operation fails.
+   * @throws An error if the fetch operation fails or URL is invalid.
    * 
    * @todo Add caching for fetched source maps.
    */
   private async fetchSourceMapContent(url: string) {
+    // Validate URL to prevent SSRF attacks
+    validateUrl(url);
 
     try {
       const res = await fetch(url, {
@@ -186,9 +215,49 @@ class Parser {
    * @param stack - The stack trace object to parse.
    * @returns A parsed token object.
    */
-  public async praseStack(stack: Stack): Promise<Token> {
+  public async parseStack(stack: Stack): Promise<Token> {
     const sourceMapContent = await this.fetchSourceMapContent(stack.sourceMapUrl);
     return this.getSourceToken(stack.line, stack.column, sourceMapContent);
+  }
+
+  /**
+   * Validates that the parsed token matches the expected Token interface
+   * @param token - The parsed token object to validate
+   * @throws Error if the token doesn't match the expected structure
+   */
+  private validateToken(token: any): asserts token is Token {
+    if (!token || typeof token !== 'object') {
+      throw new Error('Invalid token: expected an object');
+    }
+    
+    if (typeof token.line !== 'number' || token.line < 0) {
+      throw new Error('Invalid token: line must be a non-negative number');
+    }
+    
+    if (typeof token.column !== 'number' || token.column < 0) {
+      throw new Error('Invalid token: column must be a non-negative number');
+    }
+    
+    if (typeof token.src !== 'string') {
+      throw new Error('Invalid token: src must be a string');
+    }
+    
+    if (!Array.isArray(token.sourceCode)) {
+      throw new Error('Invalid token: sourceCode must be an array');
+    }
+    
+    // Validate each source code entry
+    for (const code of token.sourceCode) {
+      if (typeof code.line !== 'number' || code.line < 0) {
+        throw new Error('Invalid source code entry: line must be a non-negative number');
+      }
+      if (typeof code.isStackLine !== 'boolean') {
+        throw new Error('Invalid source code entry: isStackLine must be a boolean');
+      }
+      if (typeof code.raw !== 'string') {
+        throw new Error('Invalid source code entry: raw must be a string');
+      }
+    }
   }
 
   /**
@@ -204,8 +273,13 @@ class Parser {
     await this.init();
 
     try {
-      const res = await stackParserJsSdk.generate_token_by_single_stack(line, column, sourceMap, this.contextOffsetLine);
-      return JSON.parse(res) satisfies Token;
+      const res = sourceMapParser.generate_token_by_single_stack(line, column, sourceMap, this.contextOffsetLine);
+      const token = JSON.parse(res);
+      
+      // Validate the token structure
+      this.validateToken(token);
+      
+      return token;
 
     } catch (error) {
       throw new Error("parse token error: " + (error instanceof Error ? error.message : error), {

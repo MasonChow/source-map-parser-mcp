@@ -140,3 +140,5 @@ pnpm-lock.yaml
 .npmrc
 
 .DS_Store
+
+.bmad-core

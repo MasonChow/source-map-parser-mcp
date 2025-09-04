@@ -27,7 +27,7 @@ server.tool('operating_guide', `
 `, async () => {
 
   try {
-    const content = await fs.readFile(path.join(import.meta.dirname, './external/docs/guide.xml'), 'utf-8');
+    const content = await fs.readFile(path.join(process.cwd(), 'README.md'), 'utf-8');
 
     return {
       content: [
@@ -43,7 +43,7 @@ server.tool('operating_guide', `
       content: [
         {
           type: "text",
-          text: "Error reading the guide doc file."
+          text: "Error reading the documentation file. Please check the README.md file in the project root."
         }
       ]
     }
@@ -101,9 +101,11 @@ server.tool("parse_stack", `
         if (e.success) {
           return e;
         } else {
+          // Sanitize error messages to avoid exposing internal details
+          const sanitizedMessage = e.error.message.replace(/[^\w\s.:\-\/]/g, '');
           return {
             success: false,
-            msg: e.error.message,
+            msg: sanitizedMessage,
           }
         }
       }))

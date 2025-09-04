@@ -5,7 +5,7 @@ The content has been processed where empty lines have been removed, content has 
 This section contains a summary of this file.
 
 <purpose>
-This file contains a packed representation of the entire repository's contents.
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
 It is designed to be easily consumable by AI systems for analysis, code review,
 or other automated processes.
 </purpose>
@@ -15,7 +15,8 @@ The content is organized as follows:
 1. This summary section
 2. Repository information
 3. Directory structure
-4. Repository files, each consisting of:
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
   - File path as an attribute
   - Full contents of the file
 </file_format>
@@ -41,14 +42,12 @@ The content is organized as follows:
 - Files are sorted by Git change count (files with more changes are at the bottom)
 </notes>
 
-<additional_info>
-
-</additional_info>
-
 </file_summary>
 
 <directory_structure>
 src/
+  types/
+    source_map_parser_node.d.ts
   cachingFetch.ts
   main.ts
   memoryCacheManager.ts
@@ -62,6 +61,33 @@ README.md
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="src/types/source_map_parser_node.d.ts">
+export function init(): Promise<void>;
+export function generate_token_by_single_stack(
+    line: number,
+    column: number,
+    sourceMap: string,
+    contextOffset?: number
+  ): string;
+// Add other functions from the package as needed
+export function lookup_token(
+    sourceMap: string,
+    line: number,
+    column: number
+  ): string;
+export function lookup_token_with_context(
+    sourceMap: string,
+    line: number,
+    column: number,
+    contextLines: number
+  ): string;
+export function map_error_stack(
+    sourceMap: string,
+    errorStack: string,
+    contextLines?: number
+  ): string;
+</file>
 
 <file path="src/memoryCacheManager.ts">
 // Cache entry type
@@ -192,7 +218,7 @@ export async function cachingFetch(
 <file path="src/main.ts">
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import server from './server';
-export const main = async () =>
+export const stdio = async () =>
 </file>
 
 <file path="src/server.ts">
@@ -202,10 +228,11 @@ import packageJson from "../package.json";
 import Parser from "./parser";
 import fs from 'node:fs/promises';
 import path from 'node:path';
+⋮----
+// Sanitize error messages to avoid exposing internal details
 </file>
 
 <file path="src/parser.ts">
-import { stackParserJsSdk } from './external/index.js';
 import fetch from './cachingFetch'
 interface Stack {
   /** Line number in the stack trace */
@@ -277,6 +304,20 @@ type BatchParseResult = Array<{
 /** Parsed token object */
 ⋮----
 const arrayBufferToString = (buffer: ArrayBuffer): string =>
+/**
+ * Validates a URL to prevent SSRF attacks
+ * @param url - The URL to validate
+ * @throws Error if the URL is invalid or potentially malicious
+ */
+const validateUrl = (url: string): void =>
+⋮----
+// Allow only HTTP and HTTPS protocols
+⋮----
+// Optional: Add domain allowlist/blocklist here if needed
+// Example: if (parsedUrl.hostname.endsWith('.internal.company.com')) {
+//   throw new Error('Access to internal domains is not allowed');
+// }
+⋮----
 class Parser
 ⋮----
 /** Indicates whether the parser has been initialized */
@@ -300,11 +341,14 @@ private async init()
    * 
    * @param url - The URL of the source map file.
    * @returns The content of the source map file as a string.
-   * @throws An error if the fetch operation fails.
+   * @throws An error if the fetch operation fails or URL is invalid.
    * 
    * @todo Add caching for fetched source maps.
    */
 private async fetchSourceMapContent(url: string)
+⋮----
+// Validate URL to prevent SSRF attacks
+⋮----
 /**
    * Parses an array of stack trace objects and returns the results in batch.
    * 
@@ -333,7 +377,16 @@ public async batchParseStack(stackArr: Stack[]): Promise<BatchParseResult>
    * @param stack - The stack trace object to parse.
    * @returns A parsed token object.
    */
-public async praseStack(stack: Stack): Promise<Token>
+public async parseStack(stack: Stack): Promise<Token>
+/**
+   * Validates that the parsed token matches the expected Token interface
+   * @param token - The parsed token object to validate
+   * @throws Error if the token doesn't match the expected structure
+   */
+private validateToken(token: any): asserts token is Token
+⋮----
+// Validate each source code entry
+⋮----
 /**
    * Retrieves the source token for a given line and column in the source map.
    * 
@@ -344,6 +397,8 @@ public async praseStack(stack: Stack): Promise<Token>
    * @throws An error if the token generation fails.
    */
 public async getSourceToken(line: number, column: number, sourceMap: string): Promise<Token>
+⋮----
+// Validate the token structure
 </file>
 
 <file path="README.md">
