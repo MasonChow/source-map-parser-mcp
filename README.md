@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/masonchow-source-map-parser-mcp-badge.png)](https://mseep.ai/app/masonchow-source-map-parser-mcp)
+
 # Source Map Parser
 
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
