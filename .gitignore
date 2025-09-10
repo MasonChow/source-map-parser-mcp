@@ -142,3 +142,6 @@ pnpm-lock.yaml
 .DS_Store
 
 .bmad-core
+
+.mcpregistry_registry_token
+.mcpregistry_github_token
