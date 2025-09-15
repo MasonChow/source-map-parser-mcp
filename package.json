@@ -1,6 +1,6 @@
 {
   "name": "source-map-parser-mcp",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "type": "module",
   "description": "Parse JavaScript error stack traces back to original source code using source maps",
   "mcpName": "io.github.MasonChow/source-map-parser-mcp",
@@ -44,6 +44,6 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "source_map_parser_node": "^0.2.0"
+    "source_map_parser_node": "0.3.0"
   }
 }
