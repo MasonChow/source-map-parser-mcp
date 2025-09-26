@@ -4,7 +4,16 @@
   "type": "module",
   "description": "Parse JavaScript error stack traces back to original source code using source maps",
   "mcpName": "io.github.MasonChow/source-map-parser-mcp",
-  "main": "index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
   "scripts": {
     "build": "bash build.sh",
     "build:vite": "vite build",
@@ -34,6 +43,8 @@
     "@types/node": "^22.13.14",
     "@vitest/coverage-v8": "^3.1.1",
     "@vitest/ui": "^3.1.1",
+    "rollup": "^4.52.2",
+    "rollup-plugin-dts": "^6.2.3",
     "typescript": "^5.8.2",
     "vite": "^6.2.4",
     "vite-plugin-top-level-await": "^1.6.0",

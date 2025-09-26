@@ -1,3 +1,46 @@
+### 作为 npm 包在自定义 MCP 服务中使用
+
+你可以在自己的 MCP 进程中嵌入本项目提供的工具，并按需定制行为。
+安装：
+
+```bash
+npm install source-map-parser-mcp
+```
+
+最小示例（TypeScript）：
+
+```ts
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  registerTools,
+  Parser,
+  type ToolsRegistryOptions,
+} from 'source-map-parser-mcp';
+
+const server = new McpServer(
+  { name: 'your-org.source-map-parser', version: '0.0.1' },
+  { capabilities: { tools: {} } }
+);
+
+// 可选：通过环境变量控制上下文行数
+const options: ToolsRegistryOptions = {
+  contextOffsetLine:
+    Number(process.env.SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE) || 1,
+};
+
+registerTools(server, options);
+
+// 以 stdio 方式启动
+const transport = new StdioServerTransport();
+await server.connect(transport);
+
+// 如果不通过 MCP，也可以在代码中直接调用解析：
+const parser = new Parser({ contextOffsetLine: 1 });
+// await parser.parseStack({ line: 10, column: 5, sourceMapUrl: 'https://...' });
+// await parser.batchParseStack([{ line, column, sourceMapUrl }]);
+```
+
 # Source Map 解析器
 
 🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
@@ -17,7 +60,7 @@
 
 ## MCP 串接
 
-> 注意: 需要 Node.js 18+ 版本支持
+> 注意: 需要 Node.js 20+ 版本支持
 
 方式一：NPX 直接运行
 
@@ -31,6 +74,33 @@ npx -y source-map-parser-mcp@latest
 
 ```bash
 node dist/main.es.js
+```
+
+### 构建与类型声明
+
+本项目同时提供 ESM 与 CJS 构建，并打包为单一的 TypeScript 声明文件：
+
+- 构建产物：
+  - ESM: `dist/index.es.js`
+  - CJS: `dist/index.cjs.js`
+  - CLI 入口: `dist/main.es.js`
+  - 类型声明: `dist/index.d.ts`（单文件打包）
+
+本地快速构建：
+
+```bash
+npm install
+npm run build
+```
+
+在你的项目中使用类型：
+
+```ts
+import {
+  Parser,
+  registerTools,
+  type ToolsRegistryOptions,
+} from 'source-map-parser-mcp';
 ```
 
 ### 运行参数配置
@@ -153,8 +223,8 @@ Uncaught Error: This is a error
 
 > parser init error: WebAssembly.instantiate(): invalid value type 'externref', enable with --experimental-wasm-reftypes @+86
 
-1. **检查 Node.js 版本**：确保 Node.js 版本为 18 或更高。如果版本低于 18，请升级 Node.js。
-2. **启用实验性标志**：如果 Node.js 版本为 18+ 但仍然遇到问题，请使用以下命令启动工具：
+1. **检查 Node.js 版本**：确保 Node.js 版本为 20 或更高。如果版本低于 20，请升级 Node.js。
+2. **启用实验性标志**：如果 Node.js 版本为 20+ 但仍然遇到问题，请使用以下命令启动工具：
    ```bash
    npx --node-arg=--experimental-wasm-reftypes -y source-map-parser-mcp@latest
    ```

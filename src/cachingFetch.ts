@@ -9,6 +9,13 @@ const cacheManager = new MemoryCacheManager({
   maxSize: cacheSizeMB // Size in MB
 });
 
+const bufferToArrayBuffer = (buffer: Buffer): ArrayBuffer => {
+  const arrayBuffer = new ArrayBuffer(buffer.length);
+  const view = new Uint8Array(arrayBuffer);
+  view.set(buffer);
+  return arrayBuffer;
+};
+
 /**
  * Enhanced fetch function that supports ETag-based memory caching
  * @param url Request URL
@@ -41,7 +48,7 @@ export async function cachingFetch(
   // Handle 304 Not Modified response
   if (response.status === 304 && cachedEntry) {
     // Create new response from cache
-    const cachedResponse = new Response(cachedEntry.data, {
+    const cachedResponse = new Response(bufferToArrayBuffer(cachedEntry.data), {
       status: 200,
       statusText: 'OK',
       headers: response.headers
