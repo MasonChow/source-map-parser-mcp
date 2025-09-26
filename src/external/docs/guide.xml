@@ -163,25 +163,6 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { afterAll, beforeAll, expect, test } from 'vitest';
 </file>
 
-<file path="tests/issue-21-fix.test.ts">
-import { describe, it, expect } from 'vitest';
-import Parser from '../src/parser.js';
-import fs from 'fs/promises';
-import path from 'path';
-⋮----
-// Read the local source map file mentioned in the issue
-⋮----
-// Test the exact stack traces from the issue
-⋮----
-// Verify the token structure is correct
-⋮----
-// Verify sourceCode array contains SourceCode objects with correct structure
-⋮----
-// Use the local source map file for consistent results
-⋮----
-// For file:// URLs, we expect fetch to fail, which is OK
-</file>
-
 <file path="tests/memoryCacheManager.test.ts">
 import { describe, it, expect, beforeEach } from 'vitest';
 import MemoryCacheManager from '../src/memoryCacheManager';
@@ -233,6 +214,25 @@ export async function cachingFetch(
 // Also export the cache manager to allow access to cache statistics or manual cache clearing when needed
 ⋮----
 // Export the enhanced fetch function
+</file>
+
+<file path="tests/issue-21-fix.test.ts">
+import { describe, it, expect } from 'vitest';
+import Parser from '../src/parser.js';
+import fs from 'fs/promises';
+import path from 'path';
+⋮----
+// Read the local source map file mentioned in the issue
+⋮----
+// Test the exact stack traces from the issue
+⋮----
+// Verify the token structure is correct
+⋮----
+// Verify sourceCode array contains SourceCode objects with correct structure
+⋮----
+// Use the local source map file for consistent results
+⋮----
+// For file:// URLs, we expect fetch to fail, which is OK
 </file>
 
 <file path="src/main.ts">
