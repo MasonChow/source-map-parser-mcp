@@ -6,11 +6,11 @@ import path from 'path';
 describe('Issue #21 - Token validation fix', () => {
   it('should correctly parse multiple stack traces from the issue report', async () => {
     const parser = new Parser({ contextOffsetLine: 1 });
-    
+
     // Read the local source map file mentioned in the issue
     const sourceMapPath = path.join(process.cwd(), 'example', 'special', 'foo.js.map');
     const sourceMapContent = await fs.readFile(sourceMapPath, 'utf-8');
-    
+
     // Test the exact stack traces from the issue
     const testCases = [
       { line: 49, column: 34832, description: 'Main error location' },
@@ -24,46 +24,48 @@ describe('Issue #21 - Token validation fix', () => {
       { line: 48, column: 107925, description: 'Anonymous call' },
       { line: 25, column: 1635, description: 'MessagePort.Ot call' }
     ];
-    
+
     console.log('Testing all stack traces from the original issue...');
-    
+
     for (const testCase of testCases) {
       try {
         const token = await parser.getSourceToken(testCase.line, testCase.column, sourceMapContent);
-        
+
         // Verify the token structure is correct
         expect(token).toBeDefined();
         expect(typeof token.line).toBe('number');
         expect(typeof token.column).toBe('number');
         expect(typeof token.src).toBe('string');
         expect(Array.isArray(token.sourceCode)).toBe(true);
-        
+
         // Verify sourceCode array contains SourceCode objects with correct structure
         for (const sourceCode of token.sourceCode) {
           expect(typeof sourceCode.line).toBe('number');
           expect(typeof sourceCode.isStackLine).toBe('boolean');
           expect(typeof sourceCode.raw).toBe('string');
         }
-        
+
         console.log(`✅ ${testCase.description} (${testCase.line}:${testCase.column}) - Success`);
         console.log(`   → Mapped to: ${token.src}:${token.line}:${token.column}`);
-        
+
       } catch (error) {
-        console.error(`❌ ${testCase.description} (${testCase.line}:${testCase.column}) - Failed:`, error.message);
+        if (error instanceof Error) {
+          console.error(`❌ ${testCase.description} (${testCase.line}:${testCase.column}) - Failed:`, error.message);
+        }
         throw error;
       }
     }
-    
+
     console.log('🎉 All test cases passed! The issue has been resolved.');
   });
-  
+
   it('should handle batch parsing correctly', async () => {
     const parser = new Parser({ contextOffsetLine: 1 });
-    
+
     // Use the local source map file for consistent results
     const sourceMapPath = path.join(process.cwd(), 'example', 'special', 'foo.js.map');
     const sourceMapUrl = `file://${sourceMapPath}`;
-    
+
     const stacks = [
       {
         line: 49,
@@ -76,14 +78,14 @@ describe('Issue #21 - Token validation fix', () => {
         sourceMapUrl: sourceMapUrl
       }
     ];
-    
+
     try {
       const result = await parser.batchParseStack(stacks);
-      
+
       expect(result).toBeDefined();
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBe(2);
-      
+
       for (const res of result) {
         if (res.success) {
           expect(res.token).toBeDefined();
@@ -95,7 +97,7 @@ describe('Issue #21 - Token validation fix', () => {
           expect(res.error).toBeDefined();
         }
       }
-      
+
     } catch (error) {
       console.error('Batch parsing test error:', error);
       throw error;

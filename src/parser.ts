@@ -53,17 +53,17 @@ const arrayBufferToString = (buffer: ArrayBuffer): string => {
 const validateUrl = (url: string): void => {
   try {
     const parsedUrl = new URL(url);
-    
+
     // Allow only HTTP and HTTPS protocols
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
       throw new Error(`Invalid protocol: ${parsedUrl.protocol}. Only HTTP and HTTPS are allowed.`);
     }
-    
+
     // Optional: Add domain allowlist/blocklist here if needed
     // Example: if (parsedUrl.hostname.endsWith('.internal.company.com')) {
     //   throw new Error('Access to internal domains is not allowed');
     // }
-    
+
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(`Invalid URL format: ${url}`);
@@ -229,23 +229,23 @@ class Parser {
     if (!token || typeof token !== 'object') {
       throw new Error('Invalid token: expected an object');
     }
-    
+
     if (typeof token.line !== 'number' || token.line < 0) {
       throw new Error('Invalid token: line must be a non-negative number');
     }
-    
+
     if (typeof token.column !== 'number' || token.column < 0) {
       throw new Error('Invalid token: column must be a non-negative number');
     }
-    
+
     if (typeof token.src !== 'string') {
       throw new Error('Invalid token: src must be a string');
     }
-    
+
     if (!Array.isArray(token.sourceCode)) {
       throw new Error('Invalid token: sourceCode must be an array');
     }
-    
+
     // Validate each source code entry
     for (const code of token.sourceCode) {
       if (typeof code.line !== 'number' || code.line < 0) {
@@ -292,14 +292,22 @@ class Parser {
 
     try {
       const res = sourceMapParser.generate_token_by_single_stack(line, column, sourceMap, this.contextOffsetLine);
-      const rawToken = JSON.parse(res);
-      
+
+      let rawToken: unknown;
+      if (typeof res === 'string') {
+        rawToken = JSON.parse(res);
+      } else if (res && typeof res === 'object') {
+        rawToken = res;
+      } else {
+        throw new Error(`unexpected token response type: ${typeof res}`);
+      }
+
       // Transform the raw token to match the expected interface
       const token = this.transformToken(rawToken);
-      
+
       // Validate the token structure
       this.validateToken(token);
-      
+
       return token;
 
     } catch (error) {
