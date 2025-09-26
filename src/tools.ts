@@ -89,7 +89,7 @@ export function registerTools(server: McpServer, options: ToolsRegistryOptions =
           return e;
         } else {
           // Sanitize error messages to avoid exposing internal details
-          const sanitizedMessage = e.error.message.replace(/[^\w\s.:\-\/]/g, '');
+          const sanitizedMessage = e.error.message.replace(/[^\w\s.:\-]/g, '');
           return {
             success: false,
             msg: sanitizedMessage,
