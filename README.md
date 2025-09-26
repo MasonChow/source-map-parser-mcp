@@ -19,7 +19,7 @@ This project implements a WebAssembly-based Source Map parser that can map JavaS
 
 ## MCP Integration
 
-> Note: Requires Node.js 18+ support
+> Note: Requires Node.js 20+ support
 
 Option 1: Run directly with NPX
 
@@ -33,6 +33,77 @@ Download the corresponding version of the build artifacts from the [GitHub Relea
 
 ```bash
 node dist/main.es.js
+```
+
+### Use as an npm package (bring your own MCP server)
+
+You can embed the tools into your own MCP server process and customize behavior.
+
+Install:
+
+```bash
+npm install source-map-parser-mcp
+```
+
+Minimal server (TypeScript):
+
+```ts
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  registerTools,
+  Parser,
+  type ToolsRegistryOptions,
+} from 'source-map-parser-mcp';
+
+const server = new McpServer(
+  { name: 'your-org.source-map-parser', version: '0.0.1' },
+  { capabilities: { tools: {} } }
+);
+
+// Optional: control context lines via env
+const options: ToolsRegistryOptions = {
+  contextOffsetLine:
+    Number(process.env.SOURCE_MAP_PARSER_CONTEXT_OFFSET_LINE) || 1,
+};
+
+registerTools(server, options);
+
+// Start as stdio server
+const transport = new StdioServerTransport();
+await server.connect(transport);
+
+// If you need programmatic parsing without MCP:
+const parser = new Parser({ contextOffsetLine: 1 });
+// await parser.parseStack({ line: 10, column: 5, sourceMapUrl: 'https://...' });
+// await parser.batchParseStack([{ line, column, sourceMapUrl }]);
+```
+
+### Build and Type Declarations
+
+This project ships both ESM and CJS builds and a single bundled TypeScript declaration file.
+
+- Build outputs:
+  - ESM: `dist/index.es.js`
+  - CJS: `dist/index.cjs.js`
+  - CLI entry: `dist/main.es.js`
+  - Types: `dist/index.d.ts` (single bundled d.ts)
+
+Quick build locally:
+
+```bash
+npm install
+npm run build
+```
+
+Using types in your project:
+
+```ts
+import {
+  Parser,
+  registerTools,
+  type ToolsRegistryOptions,
+} from 'source-map-parser-mcp';
 ```
 
 ### Runtime Parameter Configuration
@@ -156,8 +227,8 @@ If the tool returns the following error message, please troubleshoot as follows:
 
 > parser init error: WebAssembly.instantiate(): invalid value type 'externref', enable with --experimental-wasm-reftypes @+86
 
-1. **Check Node.js Version**: Ensure Node.js version is 18 or higher. If it's lower than 18, please upgrade Node.js.
-2. **Enable Experimental Flag**: If Node.js version is 18+ but you still encounter issues, use the following command to start the tool:
+1. **Check Node.js Version**: Ensure Node.js version is 20 or higher. If it's lower than 20, please upgrade Node.js.
+2. **Enable Experimental Flag**: If Node.js version is 20+ but you still encounter issues, use the following command to start the tool:
    ```bash
    npx --node-arg=--experimental-wasm-reftypes -y source-map-parser-mcp@latest
    ```

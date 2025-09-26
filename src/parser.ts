@@ -1,5 +1,19 @@
 import * as sourceMapParser from 'source_map_parser_node';
 import fetch from './cachingFetch'
+// Raw token interface from WebAssembly (snake_case)
+interface RawToken {
+  line: number;
+  column: number;
+  src: string;
+  source_code?: RawSourceCode[];
+}
+
+interface RawSourceCode {
+  line: number;
+  is_stack_line: boolean;
+  raw: string;
+}
+
 interface Stack {
   /** Line number in the stack trace */
   line: number;
@@ -221,40 +235,62 @@ class Parser {
   }
 
   /**
+   * Type guard to validate raw token structure from WebAssembly
+   */
+  private isRawToken(obj: unknown): obj is RawToken {
+    if (!obj || typeof obj !== 'object') {
+      return false;
+    }
+
+    return (
+      'line' in obj && typeof obj.line === 'number' &&
+      'column' in obj && typeof obj.column === 'number' &&
+      'src' in obj && typeof obj.src === 'string' &&
+      ('source_code' in obj && (obj.source_code === undefined || Array.isArray(obj.source_code)))
+    );
+  }
+
+  /**
    * Validates that the parsed token matches the expected Token interface
    * @param token - The parsed token object to validate
    * @throws Error if the token doesn't match the expected structure
    */
-  private validateToken(token: any): asserts token is Token {
+  private validateToken(token: unknown): asserts token is Token {
     if (!token || typeof token !== 'object') {
       throw new Error('Invalid token: expected an object');
     }
 
-    if (typeof token.line !== 'number' || token.line < 0) {
+    const obj = token as Record<string, unknown>;
+
+    if (typeof obj.line !== 'number' || obj.line < 0) {
       throw new Error('Invalid token: line must be a non-negative number');
     }
 
-    if (typeof token.column !== 'number' || token.column < 0) {
+    if (typeof obj.column !== 'number' || obj.column < 0) {
       throw new Error('Invalid token: column must be a non-negative number');
     }
 
-    if (typeof token.src !== 'string') {
+    if (typeof obj.src !== 'string') {
       throw new Error('Invalid token: src must be a string');
     }
 
-    if (!Array.isArray(token.sourceCode)) {
+    if (!Array.isArray(obj.sourceCode)) {
       throw new Error('Invalid token: sourceCode must be an array');
     }
 
     // Validate each source code entry
-    for (const code of token.sourceCode) {
-      if (typeof code.line !== 'number' || code.line < 0) {
+    for (const code of obj.sourceCode) {
+      if (!code || typeof code !== 'object') {
+        throw new Error('Invalid source code entry: expected an object');
+      }
+      const codeObj = code as Record<string, unknown>;
+      if (typeof codeObj.line !== 'number' || codeObj.line < 0) {
         throw new Error('Invalid source code entry: line must be a non-negative number');
       }
-      if (typeof code.isStackLine !== 'boolean') {
+      if (typeof codeObj.isStackLine !== 'boolean') {
         throw new Error('Invalid source code entry: isStackLine must be a boolean');
       }
-      if (typeof code.raw !== 'string') {
+      if (typeof codeObj.raw !== 'string') {
         throw new Error('Invalid source code entry: raw must be a string');
       }
     }
@@ -265,12 +301,12 @@ class Parser {
    * @param rawToken - The raw token object from WebAssembly (uses snake_case)
    * @returns Transformed token object matching the Token interface (uses camelCase)
    */
-  private transformToken(rawToken: any): Token {
+  private transformToken(rawToken: RawToken): Token {
     return {
       line: rawToken.line,
       column: rawToken.column,
       src: rawToken.src,
-      sourceCode: rawToken.source_code?.map((sourceCode: any) => ({
+      sourceCode: rawToken.source_code?.map((sourceCode: RawSourceCode) => ({
         line: sourceCode.line,
         isStackLine: sourceCode.is_stack_line,
         raw: sourceCode.raw
@@ -303,6 +339,10 @@ class Parser {
       }
 
       // Transform the raw token to match the expected interface
+      if (!this.isRawToken(rawToken)) {
+        throw new Error('Invalid raw token structure from WebAssembly');
+      }
+
       const token = this.transformToken(rawToken);
 
       // Validate the token structure

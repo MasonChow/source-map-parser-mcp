@@ -9,7 +9,10 @@ export default defineConfig({
   build: {
     target: 'node20',
     lib: {
-      entry: ['./src/main.ts'],
+      entry: {
+        'index': './src/index.ts',
+        'main': './src/main.ts'
+      },
       fileName: (format, entryName) => `${entryName}.${format}.js`,
       name: packageJSON.name,
       formats: ['es', 'cjs'],
