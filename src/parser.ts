@@ -237,17 +237,42 @@ class Parser {
   /**
    * Type guard to validate raw token structure from WebAssembly
    */
+  private isRawSourceCode(obj: unknown): obj is RawSourceCode {
+    return (
+      !!obj &&
+      typeof obj === 'object' &&
+      'line' in obj && typeof (obj as any).line === 'number' &&
+      'is_stack_line' in obj && typeof (obj as any).is_stack_line === 'boolean' &&
+      'raw' in obj && typeof (obj as any).raw === 'string'
+    );
+  }
+
   private isRawToken(obj: unknown): obj is RawToken {
     if (!obj || typeof obj !== 'object') {
       return false;
     }
 
-    return (
-      'line' in obj && typeof obj.line === 'number' &&
-      'column' in obj && typeof obj.column === 'number' &&
-      'src' in obj && typeof obj.src === 'string' &&
-      ('source_code' in obj && (obj.source_code === undefined || Array.isArray(obj.source_code)))
-    );
+    if (
+      !('line' in obj && typeof (obj as any).line === 'number') ||
+      !('column' in obj && typeof (obj as any).column === 'number') ||
+      !('src' in obj && typeof (obj as any).src === 'string')
+    ) {
+      return false;
+    }
+
+    if ('source_code' in obj) {
+      const sourceCode = (obj as any).source_code;
+      if (sourceCode !== undefined) {
+        if (!Array.isArray(sourceCode)) {
+          return false;
+        }
+        if (!sourceCode.every(this.isRawSourceCode)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   /**
