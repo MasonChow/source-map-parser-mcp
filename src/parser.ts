@@ -381,5 +381,73 @@ class Parser {
       });
     }
   }
+
+  /**
+   * Looks up source code context for a specific line and column position
+   * @param line - 1-based line number in the compiled code
+   * @param column - Column number in the compiled code
+   * @param sourceMapUrl - URL of the source map file
+   * @param contextLines - Number of context lines to include (default: 5)
+   * @returns Context snippet or null if not found
+   */
+  public async lookupContext(line: number, column: number, sourceMapUrl: string, contextLines: number = 5) {
+    validateUrl(sourceMapUrl);
+    await this.init();
+
+    try {
+      const sourceMapContent = await this.fetchSourceMapContent(sourceMapUrl);
+      // Use the high-level lookup_context function directly
+      const result = sourceMapParser.lookup_context(sourceMapContent, line, column, contextLines);
+
+      return result;
+    } catch (error) {
+      throw new Error("lookup context error: " + (error instanceof Error ? error.message : error), {
+        cause: error,
+      });
+    }
+  }
+
+  /**
+   * Unpacks all source files and their content from a source map
+   * @param sourceMapUrl - URL of the source map file
+   * @returns Object containing all source files with their content
+   */
+  public async unpackSources(sourceMapUrl: string) {
+    validateUrl(sourceMapUrl);
+
+    try {
+      const sourceMapContent = await this.fetchSourceMapContent(sourceMapUrl);
+      const sourceMap = JSON.parse(sourceMapContent);
+
+      if (!sourceMap.sources || !Array.isArray(sourceMap.sources)) {
+        throw new Error("Invalid source map: missing or invalid sources array");
+      }
+
+      const result: Record<string, string | null> = {};
+
+      // Extract sources from sourcesContent if available
+      if (sourceMap.sourcesContent && Array.isArray(sourceMap.sourcesContent)) {
+        sourceMap.sources.forEach((source: string, index: number) => {
+          result[source] = sourceMap.sourcesContent[index] || null;
+        });
+      } else {
+        // If no sourcesContent, list sources with null content
+        sourceMap.sources.forEach((source: string) => {
+          result[source] = null;
+        });
+      }
+
+      return {
+        sources: result,
+        sourceRoot: sourceMap.sourceRoot || null,
+        file: sourceMap.file || null,
+        totalSources: sourceMap.sources.length
+      };
+    } catch (error) {
+      throw new Error("unpack sources error: " + (error instanceof Error ? error.message : error), {
+        cause: error,
+      });
+    }
+  }
 }
 export default Parser;
