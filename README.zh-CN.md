@@ -1,6 +1,42 @@
+# Source Map 解析器
+
+🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
+
+[![Node Version](https://img.shields.io/node/v/source-map-parser-mcp)](https://nodejs.org)
+[![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
+[![Downloads](https://img.shields.io/npm/dm/source-map-parser-mcp)](https://npmjs.com/package/source-map-parser-mcp)
+[![Build Status](https://github.com/MasonChow/source-map-parser-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/MasonChow/source-map-parser-mcp/actions)
+[![codecov](https://codecov.io/gh/MasonChow/source-map-parser-mcp/graph/badge.svg)](https://codecov.io/gh/MasonChow/source-map-parser-mcp)
+![](https://badge.mcpx.dev?type=server&features=tools 'MCP server with tools')
+
+<a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
+</a>
+
+本项目实现了一个基于 WebAssembly 的 Source Map 解析器，能够将 JavaScript 错误堆栈信息映射回源代码，并提取相关的上下文信息，开发者可以方便地将 JavaScript 错误堆栈信息映射回源代码，快速定位和修复问题。希望本项目的文档能帮助开发者更好地理解和使用该工具
+
+## MCP 串接
+
+> 注意: 需要 Node.js 20+ 版本支持
+
+方式一：NPX 直接运行
+
+```bash
+npx -y source-map-parser-mcp@latest
+```
+
+方式二：下载构建产物
+
+从 [GitHub Release](https://github.com/MasonChow/source-map-parser-mcp/releases) 页面下载对应版本的构建产物，然后运行：
+
+```bash
+node dist/main.es.js
+```
+
 ### 作为 npm 包在自定义 MCP 服务中使用
 
 你可以在自己的 MCP 进程中嵌入本项目提供的工具，并按需定制行为。
+
 安装：
 
 ```bash
@@ -39,41 +75,6 @@ await server.connect(transport);
 const parser = new Parser({ contextOffsetLine: 1 });
 // await parser.parseStack({ line: 10, column: 5, sourceMapUrl: 'https://...' });
 // await parser.batchParseStack([{ line, column, sourceMapUrl }]);
-```
-
-# Source Map 解析器
-
-🌐 **语言**: [English](README.md) | [简体中文](README.zh-CN.md)
-
-[![Node Version](https://img.shields.io/node/v/source-map-parser-mcp)](https://nodejs.org)
-[![npm](https://img.shields.io/npm/v/source-map-parser-mcp.svg)](https://www.npmjs.com/package/source-map-parser-mcp)
-[![Downloads](https://img.shields.io/npm/dm/source-map-parser-mcp)](https://npmjs.com/package/source-map-parser-mcp)
-[![Build Status](https://github.com/MasonChow/source-map-parser-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/MasonChow/source-map-parser-mcp/actions)
-[![codecov](https://codecov.io/gh/MasonChow/source-map-parser-mcp/graph/badge.svg)](https://codecov.io/gh/MasonChow/source-map-parser-mcp)
-![](https://badge.mcpx.dev?type=server&features=tools 'MCP server with tools')
-
-<a href="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@MasonChow/source-map-parser-mcp/badge" />
-</a>
-
-本项目实现了一个基于 WebAssembly 的 Source Map 解析器，能够将 JavaScript 错误堆栈信息映射回源代码，并提取相关的上下文信息，开发者可以方便地将 JavaScript 错误堆栈信息映射回源代码，快速定位和修复问题。希望本项目的文档能帮助开发者更好地理解和使用该工具
-
-## MCP 串接
-
-> 注意: 需要 Node.js 20+ 版本支持
-
-方式一：NPX 直接运行
-
-```bash
-npx -y source-map-parser-mcp@latest
-```
-
-方式二：下载构建产物
-
-从 [GitHub Release](https://github.com/MasonChow/source-map-parser-mcp/releases) 页面下载对应版本的构建产物，然后运行：
-
-```bash
-node dist/main.es.js
 ```
 
 ### 构建与类型声明
@@ -124,6 +125,8 @@ npx -y source-map-parser-mcp@latest
 1. **堆栈解析**：根据提供的行号、列号和 Source Map 文件，解析出对应的源代码位置。
 2. **批量解析**：**支持同时解析多个堆栈信息**，返回批量结果。
 3. **上下文提取**：可以提取指定行数的上下文代码，帮助开发者更好地理解错误发生的环境。
+4. **上下文查找**：查找编译代码中特定位置对应的原始源代码上下文。
+5. **源文件解包**：从 source map 中提取所有源文件及其内容。
 
 ## MCP 服务工具说明
 
@@ -161,6 +164,66 @@ npx -y source-map-parser-mcp@latest
     {
       "type": "text",
       "text": "[{\"success\":true,\"token\":{\"line\":10,\"column\":5,\"sourceCode\":[{\"line\":8,\"isStackLine\":false,\"raw\":\"function foo() {\"},{\"line\":9,\"isStackLine\":false,\"raw\":\"  console.log('bar');\"},{\"line\":10,\"isStackLine\":true,\"raw\":\"  throw new Error('test');\"},{\"line\":11,\"isStackLine\":false,\"raw\":\"}\"}],\"src\":\"index.js\"}}]"
+    }
+  ]
+}
+```
+
+### `lookup_context`
+
+查找编译/压缩代码中特定行列位置对应的原始源代码上下文。
+
+#### 请求示例
+
+- line: 编译代码中的行号（从1开始），必填。
+- column: 编译代码中的列号，必填。
+- sourceMapUrl: Source Map 文件的 URL，必填。
+- contextLines: 包含的上下文行数（默认：5），可选。
+
+```json
+{
+  "line": 42,
+  "column": 15,
+  "sourceMapUrl": "https://example.com/app.js.map",
+  "contextLines": 5
+}
+```
+
+#### 响应示例
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"filePath\":\"src/utils.js\",\"targetLine\":25,\"contextLines\":[{\"lineNumber\":23,\"content\":\"function calculateSum(a, b) {\"},{\"lineNumber\":24,\"content\":\"  if (a < 0 || b < 0) {\"},{\"lineNumber\":25,\"content\":\"    throw new Error('Negative numbers not allowed');\"},{\"lineNumber\":26,\"content\":\"  }\"},{\"lineNumber\":27,\"content\":\"  return a + b;\"}]}"
+    }
+  ]
+}
+```
+
+### `unpack_sources`
+
+从 source map 中提取所有源文件及其内容。
+
+#### 请求示例
+
+- sourceMapUrl: 要解包的 Source Map 文件 URL，必填。
+
+```json
+{
+  "sourceMapUrl": "https://example.com/bundle.js.map"
+}
+```
+
+#### 响应示例
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"sources\":{\"src/index.js\":\"import { utils } from './utils.js';\\nconsole.log('Hello World!');\",\"src/utils.js\":\"export const utils = { add: (a, b) => a + b };\"},\"sourceRoot\":\"/\",\"file\":\"bundle.js\",\"totalSources\":2}"
     }
   ]
 }

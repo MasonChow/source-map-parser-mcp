@@ -127,6 +127,8 @@ npx -y source-map-parser-mcp@latest
 1. **Stack Parsing**: Parse the corresponding source code location based on provided line number, column number, and Source Map file.
 2. **Batch Processing**: Support parsing multiple stack traces simultaneously and return batch results.
 3. **Context Extraction**: Extract context code for a specified number of lines to help developers better understand the environment where errors occur.
+4. **Context Lookup**: Look up original source code context for specific compiled code positions.
+5. **Source Unpacking**: Extract all source files and their content from source maps.
 
 ## MCP Service Tool Description
 
@@ -165,6 +167,66 @@ Parse stack information by providing stack traces and Source Map addresses.
     {
       "type": "text",
       "text": "[{\"success\":true,\"token\":{\"line\":10,\"column\":5,\"sourceCode\":[{\"line\":8,\"isStackLine\":false,\"raw\":\"function foo() {\"},{\"line\":9,\"isStackLine\":false,\"raw\":\"  console.log('bar');\"},{\"line\":10,\"isStackLine\":true,\"raw\":\"  throw new Error('test');\"},{\"line\":11,\"isStackLine\":false,\"raw\":\"}\"}],\"src\":\"index.js\"}}]"
+    }
+  ]
+}
+```
+
+### `lookup_context`
+
+Look up original source code context for a specific line and column position in compiled/minified code.
+
+#### Request Example
+
+- line: The line number in the compiled code (1-based), required.
+- column: The column number in the compiled code, required.
+- sourceMapUrl: The URL of the source map file, required.
+- contextLines: Number of context lines to include (default: 5), optional.
+
+```json
+{
+  "line": 42,
+  "column": 15,
+  "sourceMapUrl": "https://example.com/app.js.map",
+  "contextLines": 5
+}
+```
+
+#### Response Example
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"filePath\":\"src/utils.js\",\"targetLine\":25,\"contextLines\":[{\"lineNumber\":23,\"content\":\"function calculateSum(a, b) {\"},{\"lineNumber\":24,\"content\":\"  if (a < 0 || b < 0) {\"},{\"lineNumber\":25,\"content\":\"    throw new Error('Negative numbers not allowed');\"},{\"lineNumber\":26,\"content\":\"  }\"},{\"lineNumber\":27,\"content\":\"  return a + b;\"}]}"
+    }
+  ]
+}
+```
+
+### `unpack_sources`
+
+Extract all source files and their content from a source map.
+
+#### Request Example
+
+- sourceMapUrl: The URL of the source map file to unpack, required.
+
+```json
+{
+  "sourceMapUrl": "https://example.com/bundle.js.map"
+}
+```
+
+#### Response Example
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"sources\":{\"src/index.js\":\"import { utils } from './utils.js';\\nconsole.log('Hello World!');\",\"src/utils.js\":\"export const utils = { add: (a, b) => a + b };\"},\"sourceRoot\":\"/\",\"file\":\"bundle.js\",\"totalSources\":2}"
     }
   ]
 }
